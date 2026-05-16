@@ -1,0 +1,132 @@
+{
+  "report_info": {
+    "analyst": "柯骋",
+    "student_id": "25210150",
+    "role": "宏观与政策面分析师",
+    "period": "2026-05-11 至 2026-05-15",
+    "generated_date": "2026-05-16"
+  },
+  "macro_data": {
+    "CPI": {
+      "value": 1.2,
+      "unit": "%",
+      "type": "同比",
+      "previous": 0.9,
+      "direction": "up",
+      "comment": "受国际原油价格上涨及假期出行需求拉动，CPI温和回升"
+    },
+    "PPI": {
+      "value": 2.8,
+      "unit": "%",
+      "type": "同比",
+      "previous": 1.5,
+      "direction": "up",
+      "comment": "国际大宗商品价格快速上涨，输入型通胀压力显现"
+    },
+    "PMI": {
+      "value": 50.3,
+      "unit": "%",
+      "type": "制造业",
+      "previous": 50.4,
+      "direction": "down",
+      "comment": "连续2月保持荣枯线以上，制造业景气总体稳定"
+    },
+    "M1": {
+      "value": 5.0,
+      "unit": "%",
+      "type": "同比",
+      "previous": 5.1,
+      "direction": "down",
+      "comment": "企业资金活化程度边际改善，但M0增速回落拖累"
+    },
+    "M2": {
+      "value": 8.6,
+      "unit": "%",
+      "type": "同比",
+      "previous": 8.5,
+      "direction": "up",
+      "comment": "外汇占款多增+财政支出加快支撑"
+    },
+    "new_social_financing": {
+      "value": 6207,
+      "unit": "亿元",
+      "type": "新增",
+      "previous": null,
+      "direction": "down",
+      "comment": "同比少增5392亿元，社融增速7.8%"
+    },
+    "new_loans": {
+      "value": -100,
+      "unit": "亿元",
+      "type": "新增人民币贷款",
+      "previous": null,
+      "direction": "down",
+      "comment": "同比少增2900亿元，居民和企业中长贷为主要拖累"
+    },
+    "CNY_USD": {
+      "value": 6.8415,
+      "unit": "",
+      "type": "中间价",
+      "previous": 6.8426,
+      "direction": "up",
+      "comment": "人民币升值，5月初一度升破6.80关口"
+    }
+  },
+  "policy_events": [
+    {
+      "date": "2026-05-11",
+      "source": "央行",
+      "title": "2026年一季度货币政策执行报告",
+      "impact": "从适度宽松逐步回归稳健，删去降准降息表述",
+      "sentiment": "中性偏紧"
+    },
+    {
+      "date": "2026-05-08",
+      "source": "多家银行",
+      "title": "下调存款利率",
+      "impact": "加速存款搬家，利好A股流动性",
+      "sentiment": "利好"
+    },
+    {
+      "date": "2026-05-11",
+      "source": "证监会",
+      "title": "2026年度立法工作计划",
+      "impact": "持续推进资本市场制度完善",
+      "sentiment": "中性偏多"
+    },
+    {
+      "date": "2026-05-15",
+      "source": "深交所",
+      "title": "对293起异常交易行为采取自律监管",
+      "impact": "加强市场交易监管，短期抑制投机",
+      "sentiment": "中性"
+    }
+  ],
+  "overseas_markets": {
+    "US": {
+      "DOW": {"close": 49526.11, "weekly_change": "下跌"},
+      "SP500": {"close": 7408.50, "friday_change_pct": -1.24},
+      "NASDAQ": {"close": 26225.14, "friday_change_pct": -1.54},
+      "key_event": "4月PPI同比飙升6%，30年期美债收益率突破5.1%"
+    },
+    "HK": {
+      "HSI": {"close": 25962.73, "weekly_change_pct": -1.63},
+      "HSTECH": {"close": 4941.14, "weekly_change_pct": -3.17},
+      "key_event": "美债警报拉响，亚太市场集体杀跌"
+    }
+  },
+  "support_factors": [
+    "居民存款搬家持续，非银存款大增",
+    "PMI连续扩张，经济温和复苏",
+    "存款利率下行，资金向资本市场转移",
+    "人民币汇率稳定，外资配置意愿增强",
+    "结构性政策工具定向支持重点领域"
+  ],
+  "pressure_factors": [
+    "输入型通胀升温，PPI涨幅扩大",
+    "美债收益率飙升，全球风险偏好受压",
+    "社融信贷偏弱，实体融资需求待修复",
+    "外围市场回调，短期情绪传导",
+    "降息预期落空，央行宽松预期降温"
+  ]
+}
