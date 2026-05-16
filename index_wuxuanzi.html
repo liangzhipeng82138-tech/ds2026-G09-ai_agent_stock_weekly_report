@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A股周报 · 板块与行业轮动分析 | 吴璇子</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f2f5; color: #1a1a2e; line-height: 1.7; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        
+        /* Header */
+        .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: white; padding: 40px 30px; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(15,52,96,0.3); }
+        .header h1 { font-size: 28px; margin-bottom: 8px; letter-spacing: 1px; }
+        .header .subtitle { font-size: 16px; opacity: 0.85; margin-bottom: 16px; }
+        .header .meta { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; opacity: 0.75; }
+        .header .meta span { background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 20px; }
+        
+        /* Section Cards */
+        .section-card { background: white; border-radius: 12px; padding: 28px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .section-card h2 { font-size: 20px; color: #0f3460; border-left: 4px solid #e94560; padding-left: 12px; margin-bottom: 20px; }
+        .section-card h3 { font-size: 16px; color: #16213e; margin: 18px 0 10px; }
+        
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+        th { background: #0f3460; color: white; padding: 10px 14px; text-align: center; font-weight: 500; }
+        td { padding: 9px 14px; text-align: center; border-bottom: 1px solid #eee; }
+        tr:hover { background: #f8f9ff; }
+        .up { color: #e74c3c; font-weight: 600; }
+        .down { color: #27ae60; font-weight: 600; }
+        
+        /* Bar Chart (CSS-only) */
+        .bar-chart { margin: 20px 0; }
+        .bar-row { display: flex; align-items: center; margin: 4px 0; }
+        .bar-label { width: 90px; text-align: right; padding-right: 10px; font-size: 13px; color: #333; flex-shrink: 0; }
+        .bar-track { flex: 1; height: 24px; position: relative; background: #f5f5f5; border-radius: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; font-size: 11px; color: white; font-weight: 600; min-width: 40px; }
+        .bar-fill.positive { background: linear-gradient(90deg, #e74c3c, #c0392b); }
+        .bar-fill.negative { background: linear-gradient(90deg, #27ae60, #2ecc71); }
+        .bar-value { width: 60px; text-align: left; padding-left: 8px; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+        
+        /* Heatmap */
+        .heatmap { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+        .heatmap th, .heatmap td { padding: 8px 6px; text-align: center; border: 1px solid #e0e0e0; }
+        .heatmap th { background: #0f3460; color: white; font-size: 12px; }
+        .heatmap td.row-label { background: #f8f9ff; font-weight: 600; text-align: left; padding-left: 10px; }
+        .hm-up-3 { background: #e74c3c; color: white; }
+        .hm-up-2 { background: #f1948a; color: #333; }
+        .hm-up-1 { background: #fadbd8; color: #333; }
+        .hm-zero { background: #fefefe; color: #333; }
+        .hm-down-1 { background: #d5f5e3; color: #333; }
+        .hm-down-2 { background: #82e0aa; color: #333; }
+        .hm-down-3 { background: #27ae60; color: white; }
+        
+        /* Concept Cards */
+        .concept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; margin: 16px 0; }
+        .concept-card { border-radius: 8px; padding: 14px 16px; border-left: 4px solid; }
+        .concept-card.hot { background: #fff5f5; border-color: #e74c3c; }
+        .concept-card.cold { background: #f0fff4; border-color: #27ae60; }
+        .concept-card .title { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+        .concept-card .change { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+        .concept-card .reason { font-size: 12.5px; color: #555; line-height: 1.5; }
+        
+        /* Summary Box */
+        .summary-box { background: linear-gradient(135deg, #f8f9ff 0%, #eef1ff 100%); border-radius: 10px; padding: 20px 24px; margin: 16px 0; border: 1px solid #d0d7ff; }
+        .summary-box h3 { color: #0f3460; margin-bottom: 12px; font-size: 16px; }
+        .summary-box ul { padding-left: 20px; }
+        .summary-box li { margin-bottom: 8px; font-size: 14px; }
+        .summary-box li strong { color: #e94560; }
+        
+        /* Rotation Timeline */
+        .rotation-timeline { position: relative; padding: 20px 0 20px 30px; border-left: 3px solid #0f3460; margin: 16px 0 16px 20px; }
+        .rotation-item { position: relative; margin-bottom: 20px; }
+        .rotation-item::before { content: ''; position: absolute; left: -37px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: #0f3460; border: 3px solid white; box-shadow: 0 0 0 2px #0f3460; }
+        .rotation-item .date { font-weight: 700; color: #0f3460; font-size: 14px; }
+        .rotation-item .leader { font-size: 13px; margin-top: 4px; }
+        
+        /* Chart Image */
+        .chart-img { width: 100%; border-radius: 8px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        
+        /* Footer */
+        .footer { text-align: center; padding: 20px; color: #888; font-size: 12px; margin-top: 20px; }
+        
+        @media (max-width: 768px) {
+            .container { padding: 12px; }
+            .header { padding: 24px 18px; }
+            .header h1 { font-size: 22px; }
+            .section-card { padding: 18px; }
+            .concept-grid { grid-template-columns: 1fr; }
+            .bar-label { width: 70px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <h1>📊 A股周报 · 板块与行业轮动分析</h1>
+        <div class="subtitle">2026年5月12日 — 5月15日 · 第09组 · 吴璇子</div>
+        <div class="meta">
+            <span>课程：数据分析与经济决策（ds2026）</span>
+            <span>学号：25210264</span>
+            <span>分工：板块与行业轮动分析师</span>
+        </div>
+    </div>
+
+    <!-- Section 1: Industry Ranking -->
+    <div class="section-card">
+        <h2>一、申万一级行业涨跌幅排名</h2>
+        
+        <h3>📊 全行业涨跌幅柱状图</h3>
+        <img src="output/industry_ranking.png" alt="行业涨跌幅排名" class="chart-img">
+        
+        <h3>📈 涨幅TOP5行业分析</h3>
+        <table>
+            <tr><th>排名</th><th>行业</th><th>周涨跌幅</th><th>核心驱动因素</th></tr>
+            <tr><td>1</td><td>通信</td><td class="up">+2.58%</td><td style="text-align:left">AI算力需求扩张 + 6G概念催化 + 通信设备出口向好</td></tr>
+            <tr><td>2</td><td>公用事业</td><td class="up">+1.42%</td><td style="text-align:left">夏季用电高峰预期 + 电网投资加码 + 主力资金连续净流入</td></tr>
+            <tr><td>3</td><td>电子</td><td class="up">+1.15%</td><td style="text-align:left">半导体+消费电子双轮驱动，5/13主力净流入226.95亿</td></tr>
+            <tr><td>4</td><td>电力设备</td><td class="up">+0.93%</td><td style="text-align:left">新能源企稳回升 + 光伏/储能政策利好 + 电网设备连续强势</td></tr>
+            <tr><td>5</td><td>机械设备</td><td class="up">+0.72%</td><td style="text-align:left">人形机器人概念发酵 + 工程机械出口超预期 + 5/15逆势上涨0.92%</td></tr>
+        </table>
+
+        <h3>📉 跌幅TOP5行业分析</h3>
+        <table>
+            <tr><th>排名</th><th>行业</th><th>周涨跌幅</th><th>核心拖累因素</th></tr>
+            <tr><td>31</td><td>有色金属</td><td class="down">-4.15%</td><td style="text-align:left">大宗商品回调 + 5/14主力净流出157.76亿 + 小金属大跌4.42%</td></tr>
+            <tr><td>30</td><td>综合</td><td class="down">-3.72%</td><td style="text-align:left">防御属性不足 + 资金大幅流出</td></tr>
+            <tr><td>29</td><td>建筑材料</td><td class="down">-3.45%</td><td style="text-align:left">地产链承压 + 地产销售数据不及预期</td></tr>
+            <tr><td>28</td><td>建筑装饰</td><td class="down">-2.88%</td><td style="text-align:left">基建投资增速放缓预期 + 与建材同属地产链</td></tr>
+            <tr><td>27</td><td>农林牧渔</td><td class="down">-2.65%</td><td style="text-align:left">猪周期底部徘徊 + 农产品价格走弱</td></tr>
+        </table>
+    </div>
+
+    <!-- Section 2: Hot Concepts -->
+    <div class="section-card">
+        <h2>二、热门概念题材解析</h2>
+        
+        <img src="output/concept_ranking.png" alt="概念题材涨跌幅" class="chart-img">
+        
+        <div class="concept-grid">
+            <div class="concept-card hot">
+                <div class="title">🤖 AI算力 / 半导体</div>
+                <div class="change up">+3.85%</div>
+                <div class="reason">AI大模型训练需求爆发，算力芯片供不应求。5/13半导体成交额4056亿创新高，4只个股涨停。</div>
+            </div>
+            <div class="concept-card hot">
+                <div class="title">⚡ 电网 / 电力改革</div>
+                <div class="change up">+2.95%</div>
+                <div class="reason">电力市场化改革加速，夏季用电高峰预期提前升温。电力板块12只个股涨停，主力资金连续3天净流入。</div>
+            </div>
+            <div class="concept-card hot">
+                <div class="title">🦾 人形机器人</div>
+                <div class="change up">+2.72%</div>
+                <div class="reason">特斯拉Optimus量产预期升温，国内政策持续扶持，5/15逆势上涨表现抗跌。</div>
+            </div>
+            <div class="concept-card hot">
+                <div class="title">📡 6G通信</div>
+                <div class="change up">+2.68%</div>
+                <div class="reason">6G标准推进提速，通信设备出口数据向好，5/12通信板块领涨全市场。</div>
+            </div>
+            <div class="concept-card hot">
+                <div class="title">🧪 氟化工</div>
+                <div class="change up">+1.95%</div>
+                <div class="reason">制冷剂涨价周期启动，供需格局改善，5/15板块涨幅居前。</div>
+            </div>
+            <div class="concept-card hot">
+                <div class="title">🎬 短剧游戏</div>
+                <div class="change up">+1.82%</div>
+                <div class="reason">AI+内容生成模式成熟，短剧出海持续火热，传媒板块细分赛道活跃。</div>
+            </div>
+            <div class="concept-card cold">
+                <div class="title">🥇 黄金 / 贵金属</div>
+                <div class="change down">-3.45%</div>
+                <div class="reason">国际金价回调，避险情绪降温，前期强势板块本周大幅补跌。</div>
+            </div>
+            <div class="concept-card cold">
+                <div class="title">☀️ 光伏设备</div>
+                <div class="change down">-2.15%</div>
+                <div class="reason">产能过剩担忧加剧，欧洲反补贴调查持续，行业基本面承压。</div>
+            </div>
+            <div class="concept-card cold">
+                <div class="title">🍷 白酒</div>
+                <div class="change down">-2.88%</div>
+                <div class="reason">消费复苏不及预期，渠道库存偏高，终端需求偏弱。</div>
+            </div>
+            <div class="concept-card cold">
+                <div class="title">🚢 港口航运</div>
+                <div class="change down">-1.95%</div>
+                <div class="reason">全球贸易摩擦升温，运价波动加剧，市场风险偏好下降。</div>
+            </div>
+        </div>
+
+        <div class="summary-box">
+            <h3>💡 热门题材核心特征</h3>
+            <ul>
+                <li><strong>科技主线全面确立</strong>：AI算力/半导体、6G通信、人形机器人三大科技题材占据涨幅前三</li>
+                <li><strong>能源改革题材崛起</strong>：电网/电力改革涨幅第二（+2.95%），电力市场化改革加速</li>
+                <li><strong>防御性题材退潮</strong>：黄金/贵金属（-3.45%）、港口航运（-1.95%）大幅回调</li>
+                <li><strong>消费板块持续低迷</strong>：白酒（-2.88%）受消费复苏不及预期影响</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Section 3: Sector Rotation -->
+    <div class="section-card">
+        <h2>三、赛道轮动总结</h2>
+        
+        <h3>📅 每日行业轮动时间线</h3>
+        <div class="rotation-timeline">
+            <div class="rotation-item">
+                <div class="date">5月12日（周一）— 科技领涨，多数调整</div>
+                <div class="leader">领涨：<span class="up">通信 +2.68%</span> | 领跌：综合 -2.23%</div>
+            </div>
+            <div class="rotation-item">
+                <div class="date">5月13日（周二）— 科技全面爆发</div>
+                <div class="leader">领涨：<span class="up">电力 +2.72%</span> | 领跌：建筑材料 -1.25%</div>
+            </div>
+            <div class="rotation-item">
+                <div class="date">5月14日（周三）— 放量大跌，周期重挫</div>
+                <div class="leader">领涨：<span class="up">机械设备 +0.92%</span> | 领跌：有色金属 -3.41%</div>
+            </div>
+            <div class="rotation-item">
+                <div class="date">5月15日（周四）— 惯性下探，防御抗跌</div>
+                <div class="leader">领涨：<span class="up">煤炭 +0.83%</span> | 领跌：有色金属 -1.65%</div>
+            </div>
+        </div>
+
+        <h3>🗺️ 重点行业日度轮动热力图</h3>
+        <img src="output/industry_rotation_heatmap.png" alt="行业轮动热力图" class="chart-img">
+
+        <div class="summary-box">
+            <h3>🎯 赛道轮动核心结论</h3>
+            <ul>
+                <li><strong>市场主线</strong>：科技成长（通信+电子+电力设备）是本周唯一持续获得资金青睐的赛道</li>
+                <li><strong>轮动速度：★★★★☆（较快）</strong>：领涨板块几乎每日切换（通信→电力→机械设备→煤炭），存量博弈加剧</li>
+                <li><strong>资金偏好</strong>：主力资金明确偏好科技成长方向，5/13电子主力净流入226.95亿创近期新高</li>
+                <li><strong>弱势赛道</strong>：有色金属（-4.15%）、建筑材料（-3.45%）、综合（-3.72%）本周最弱</li>
+                <li><strong>风险信号</strong>："追高即套"模式明显，周三科技全面爆发后周四周五快速回调</li>
+                <li><strong>下周关注</strong>：科技主线能否延续是核心看点，关注电子板块资金流向及科创50关键点位</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>数据来源：Wind、东方财富、同花顺等公开数据 | 统计区间：2026年5月12日-5月15日</p>
+        <p>ds2026 第09组 · 吴璇子（25210264） · 板块与行业轮动分析师</p>
+        <p style="margin-top:8px;color:#aaa;">⚠️ 本报告仅供学术研究参考，不构成投资建议。股市有风险，投资需谨慎。</p>
+    </div>
+
+</div>
+</body>
+</html>
