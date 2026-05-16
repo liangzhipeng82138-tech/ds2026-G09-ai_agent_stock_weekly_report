@@ -1,0 +1,79 @@
+---
+title: "A 股周报（静态演示版）"
+subtitle: "第20周（2026-05-09 至 2026-05-15）"
+author: "ds2026 第09组"
+date: today
+format:
+  html:
+    toc: true
+    theme: flatly
+    self-contained: true
+  pdf:
+    documentclass: article
+    papersize: a4
+    geometry: margin=2cm
+    include-in-header:
+      text: |
+        \usepackage{ctex}
+---
+
+# 本周市场概览
+
+```{python}
+#| echo: false
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.rcParams['font.sans-serif'] = ['SimHei', 'Arial Unicode MS']
+matplotlib.rcParams['axes.unicode_minus'] = False
+
+# 阶段一：手动填写本周数据
+weekly_data = {
+    '上证指数': {'close': 3386.73, 'change_pct': 1.47},
+    '深证成指': {'close': 10847.32, 'change_pct': 1.12},
+    '创业板指': {'close': 2165.48, 'change_pct': -0.33},
+    '科创50':  {'close': 1023.67, 'change_pct': 2.15},
+    '沪深300': {'close': 3942.58, 'change_pct': 0.89},
+    '中证500': {'close': 5612.34, 'change_pct': -0.15},
+}
+
+df = pd.DataFrame(weekly_data).T.reset_index()
+df.columns = ['指数', '收盘价', '周涨跌幅(%)']
+df['方向'] = df['周涨跌幅(%)'].apply(lambda x: '▲' if x >= 0 else '▼')
+df['显示'] = df.apply(
+    lambda r: f"{r['方向']} {abs(r['周涨跌幅(%)']):.2f}%", axis=1
+)
+df[['指数', '收盘价', '显示']].style \
+    .set_caption('主要指数周度表现')
+```
+
+# 本周 A 股热点
+
+```{python}
+#| echo: false
+# 申万行业涨幅排名（静态版手动填写）
+sectors = {
+    '通信': 4.5, '电子': 3.2, '计算机': 2.8,
+    '汽车': 1.5, '医药': 0.3, '银行': -0.5,
+    '地产': -1.2, '食品饮料': -2.1,
+}
+# 绘制行业涨跌幅柱状图
+fig, ax = plt.subplots(figsize=(10, 4))
+colors = ['#c0392b' if v >= 0 else '#27ae60' for v in sectors.values()]
+ax.barh(list(sectors.keys()), list(sectors.values()), color=colors)
+ax.axvline(0, color='black', linewidth=0.5)
+ax.set_title('本周申万行业涨跌幅排名（%）')
+ax.set_xlabel('涨跌幅（%）')
+plt.tight_layout()
+plt.show()
+```
+
+# AI 生成摘要
+
+> **注意**：以下内容为阶段一手动撰写示例，阶段二将替换为 AI 自动生成。
+
+本周 A 股整体呈震荡上行态势，科技板块领涨，通信和电子行业表现突出。上证指数周涨 1.47%，站上 3,380 点整数关口。科创板表现最为亮眼，科创50周涨 2.15%，主要受半导体及 AI 产业链政策利好驱动。创业板指周跌 0.33%，中证500微跌 0.15%，市场呈现明显的结构性行情特征。
+
+从市场情绪来看，全市场上涨家数 2,847 家，占比约 56.8%，赚钱效应较上周提升 3.2 个百分点。涨停板 87 只，跌停仅 23 只，短线情绪偏暖。两市日均成交额维持在 1.1 万亿以上水平，较上周微缩 3.2%，整体仍处存量博弈格局。
+
+北向资金本周净流入约 82.3 亿元，其中沪股通净流入 51.6 亿元，深股通净流入 30.7 亿元，外资对 A 股维持偏多态度。综合判断：大盘受政策面暖风与外部市场回暖双重提振，权重板块企稳、科技主线延续，但中小盘承压、量能未显著放大，市场仍处于震荡修复期。

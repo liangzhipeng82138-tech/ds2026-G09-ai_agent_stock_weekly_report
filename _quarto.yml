@@ -1,0 +1,37 @@
+project:
+  type: book
+  output-dir: output
+
+book:
+  title: "A股股市周报"
+  subtitle: "AI Agent 自动生成"
+  author: "ds2026 第09组"
+  date: today
+  chapters:
+    - index.qmd
+    - report_template.qmd
+
+format:
+  html:
+    theme: darkly
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    self-contained: true
+    highlight-style: github
+  pdf:
+    documentclass: article
+    papersize: a4
+    geometry: margin=2cm
+    include-in-header:
+      text: |
+        \usepackage{ctex}
+        \usepackage{booktabs}
+        \usepackage{longtable}
+
+execute:
+  echo: false
+  warning: false
+  message: false
+
+lang: zh-CN
