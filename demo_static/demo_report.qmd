@@ -1,13 +1,15 @@
 ---
-title: "A 股周报（静态演示版）"
-subtitle: "第20周（2026-05-09 至 2026-05-15）"
+title: "A股 & 美股周报"
+subtitle: "第20周（2026-05-11 至 2026-05-15）"
 author: "ds2026 第09组"
-date: today
+date: 2026-05-15
 format:
   html:
     toc: true
     theme: flatly
     self-contained: true
+    code-fold: true
+    highlight-style: github
   pdf:
     documentclass: article
     papersize: a4
@@ -29,12 +31,15 @@ matplotlib.rcParams['axes.unicode_minus'] = False
 
 # 阶段一：手动填写本周数据
 weekly_data = {
-    '上证指数': {'close': 3386.73, 'change_pct': 1.47},
-    '深证成指': {'close': 10847.32, 'change_pct': 1.12},
-    '创业板指': {'close': 2165.48, 'change_pct': -0.33},
-    '科创50':  {'close': 1023.67, 'change_pct': 2.15},
-    '沪深300': {'close': 3942.58, 'change_pct': 0.89},
-    '中证500': {'close': 5612.34, 'change_pct': -0.15},
+    '上证指数': {'close': 3368.07, 'change_pct': 0.78},
+    '深证成指': {'close': 10612.47, 'change_pct': 0.86},
+    '创业板指': {'close': 2162.15, 'change_pct': 1.31},
+    '科创50':  {'close': 1002.56, 'change_pct': 1.62},
+    '沪深300': {'close': 3945.23, 'change_pct': 0.84},
+    '中证500': {'close': 5678.91, 'change_pct': 0.98},
+    '标普500':  {'close': 5892.34, 'change_pct': 1.52},
+    '纳斯达克': {'close': 19234.56, 'change_pct': 2.18},
+    '道琼斯':   {'close': 42345.67, 'change_pct': 0.95},
 }
 
 df = pd.DataFrame(weekly_data).T.reset_index()
@@ -44,18 +49,21 @@ df['显示'] = df.apply(
     lambda r: f"{r['方向']} {abs(r['周涨跌幅(%)']):.2f}%", axis=1
 )
 df[['指数', '收盘价', '显示']].style \
+    .applymap(lambda v: 'color: red' if '▲' in str(v) else 'color: green',
+              subset=['显示']) \
     .set_caption('主要指数周度表现')
 ```
 
-# 本周 A 股热点
+# 本周A股热点
 
 ```{python}
 #| echo: false
 # 申万行业涨幅排名（静态版手动填写）
 sectors = {
-    '通信': 4.5, '电子': 3.2, '计算机': 2.8,
-    '汽车': 1.5, '医药': 0.3, '银行': -0.5,
-    '地产': -1.2, '食品饮料': -2.1,
+    '通信': 4.52, '电子': 3.21, '计算机': 2.87,
+    '国防军工': 2.15, '传媒': 1.93, '汽车': 1.45,
+    '医药生物': 0.32, '银行': -0.92,
+    '食品饮料': -1.87, '房地产': -2.34,
 }
 # 绘制行业涨跌幅柱状图
 fig, ax = plt.subplots(figsize=(10, 4))
@@ -68,12 +76,92 @@ plt.tight_layout()
 plt.show()
 ```
 
+# 北向资金与资金流向
+
+```{python}
+#| echo: false
+# 北向资金周度流向（静态版）
+import numpy as np
+days = ['周一', '周二', '周三', '周四', '周五']
+north_flow = [25.3, -12.8, 38.7, 15.2, 15.9]
+
+fig, ax = plt.subplots(figsize=(8, 4))
+colors = ['#c0392b' if v >= 0 else '#27ae60' for v in north_flow]
+ax.bar(days, north_flow, color=colors)
+ax.set_title('本周北向资金日度流向（亿元）')
+ax.set_ylabel('净流入（亿元）')
+ax.axhline(0, color='black', linewidth=0.5)
+for i, v in enumerate(north_flow):
+    ax.text(i, v + (1.5 if v >= 0 else -2.5), f'{v:.1f}', ha='center', fontsize=9)
+plt.tight_layout()
+plt.show()
+```
+
+# 重点个股表现
+
+| 股票代码 | 股票名称 | 周涨跌幅(%) | 所属行业 | 备注 |
+|:--------:|:--------:|:----------:|:--------:|:----:|
+| 002049.SZ | 紫光国微 | +12.35 | 电子 | AI芯片概念 |
+| 600519.SH | 贵州茅台 | -3.21 | 食品饮料 | 消费回调 |
+| 300750.SZ | 宁德时代 | +5.67 | 电力设备 | 新能源政策利好 |
+| 601318.SH | 中国平安 | -1.45 | 非银金融 | 保险承压 |
+| 688981.SH | 中芯国际 | +8.92 | 电子 | 半导体国产替代 |
+
+# 宏观与政策面
+
+```{python}
+#| echo: false
+# 本周重大事件时间线
+events = [
+    ('5/12', '央行MLF降息10bp', '偏多', '释放宽松信号，利好成长股估值'),
+    ('5/13', '5G-A商用牌照发放', '偏多', '通信产业链直接受益'),
+    ('5/14', '4月CPI同比+0.3%', '中性', '通胀温和，政策空间充裕'),
+    ('5/15', '美国对华芯片管制升级', '偏空', '半导体短期承压，国产替代加速'),
+]
+
+df_events = pd.DataFrame(events, columns=['日期', '事件', '影响', '解读'])
+df_events.style.set_caption('本周重大政策与宏观事件')
+```
+
+# 风险与情绪研判
+
+```{python}
+#| echo: false
+# 情绪指标概览
+fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+
+# 左：融资融券余额趋势
+dates = ['5/8', '5/9', '5/12', '5/13', '5/14', '5/15']
+margin_balance = [18234, 18267, 18312, 18356, 18389, 18423]
+axes[0].plot(dates, margin_balance, 'o-', color='#2980b9', linewidth=2)
+axes[0].set_title('融资融券余额（亿元）')
+axes[0].set_ylabel('余额（亿元）')
+axes[0].tick_params(axis='x', rotation=30)
+
+# 右：VIX与恐慌指数
+vix_values = [18.5, 17.2, 16.8, 17.5, 16.3, 15.9]
+axes[1].fill_between(range(len(vix_values)), vix_values, alpha=0.3, color='#e74c3c')
+axes[1].plot(vix_values, 'o-', color='#e74c3c', linewidth=2)
+axes[1].set_title('VIX恐慌指数')
+axes[1].set_xticks(range(len(dates)))
+axes[1].set_xticklabels(dates, rotation=30)
+axes[1].axhline(20, color='gray', linestyle='--', alpha=0.5, label='警戒线')
+axes[1].legend()
+
+plt.tight_layout()
+plt.show()
+```
+
 # AI 生成摘要
 
 > **注意**：以下内容为阶段一手动撰写示例，阶段二将替换为 AI 自动生成。
 
-本周 A 股整体呈震荡上行态势，科技板块领涨，通信和电子行业表现突出。上证指数周涨 1.47%，站上 3,380 点整数关口。科创板表现最为亮眼，科创50周涨 2.15%，主要受半导体及 AI 产业链政策利好驱动。创业板指周跌 0.33%，中证500微跌 0.15%，市场呈现明显的结构性行情特征。
+本周A股市场整体呈震荡上行态势，科技成长板块领涨。科创50以1.62%的周涨幅领跑，创业板指上涨1.31%。通信、电子、计算机行业表现突出，受5G-A商用牌照发放和AI产业政策催化。北向资金全周净流入82.3亿元，重点加仓科技方向。央行MLF降息10bp释放宽松信号。但房地产链持续承压，消费复苏偏弱。综合判断当前市场为结构性行情，科技主线清晰。
 
-从市场情绪来看，全市场上涨家数 2,847 家，占比约 56.8%，赚钱效应较上周提升 3.2 个百分点。涨停板 87 只，跌停仅 23 只，短线情绪偏暖。两市日均成交额维持在 1.1 万亿以上水平，较上周微缩 3.2%，整体仍处存量博弈格局。
+美股方面，标普500上涨1.52%，纳斯达克上涨2.18%，道琼斯上涨0.95%。美国通胀数据缓和提振降息预期，科技股表现强势。但需关注中美芯片管制升级对半导体供应链的扰动。
 
-北向资金本周净流入约 82.3 亿元，其中沪股通净流入 51.6 亿元，深股通净流入 30.7 亿元，外资对 A 股维持偏多态度。综合判断：大盘受政策面暖风与外部市场回暖双重提振，权重板块企稳、科技主线延续，但中小盘承压、量能未显著放大，市场仍处于震荡修复期。
+**下周关注**：LPR报价是否跟随MLF下调、美联储5月会议纪要、半导体板块国产替代进展。
+
+---
+
+*本报告由 ds2026 第09组 制作 | 数据截至 2026-05-15 | 阶段一：静态演示版*

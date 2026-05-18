@@ -1,0 +1,71 @@
+---
+title: "大盘整体行情概览"
+subtitle: "2026年5月11日 — 5月15日"
+author: "梁志鹏（25210177）"
+date: "2026-05-15"
+format:
+  html:
+    toc: true
+    theme: darkly
+---
+
+# 本周A股核心指数表现
+
+```{python}
+#| echo: false
+import pandas as pd
+
+weekly_data = {
+    '上证指数': {'close': 3368.07, 'change_pct': 0.78, 'amplitude': 2.15},
+    '深证成指': {'close': 10612.47, 'change_pct': 0.86, 'amplitude': 2.43},
+    '创业板指': {'close': 2162.15, 'change_pct': 1.31, 'amplitude': 3.12},
+    '科创50':  {'close': 1002.56, 'change_pct': 1.62, 'amplitude': 3.45},
+    '沪深300': {'close': 3945.23, 'change_pct': 0.84, 'amplitude': 1.98},
+    '中证500': {'close': 5678.91, 'change_pct': 0.98, 'amplitude': 2.34},
+}
+
+df = pd.DataFrame(weekly_data).T.reset_index()
+df.columns = ['指数', '收盘价', '周涨跌幅(%)', '周振幅(%)']
+df['方向'] = df['周涨跌幅(%)'].apply(lambda x: '▲' if x >= 0 else '▼')
+df['显示'] = df.apply(lambda r: f"{r['方向']} {abs(r['周涨跌幅(%)']):.2f}%", axis=1)
+df[['指数', '收盘价', '显示', '周振幅(%)']].style \
+    .applymap(lambda v: 'color: red' if '▲' in str(v) else 'color: green',
+              subset=['显示']) \
+    .set_caption('主要指数周度表现')
+```
+
+# 美股市场表现
+
+```{python}
+#| echo: false
+us_data = {
+    '标普500': {'close': 5892.34, 'change_pct': 1.23},
+    '纳斯达克': {'close': 19234.67, 'change_pct': 1.87},
+    '道琼斯':  {'close': 42356.12, 'change_pct': 0.65},
+}
+df_us = pd.DataFrame(us_data).T.reset_index()
+df_us.columns = ['指数', '收盘价', '周涨跌幅(%)']
+df_us['方向'] = df_us['周涨跌幅(%)'].apply(lambda x: '▲' if x >= 0 else '▼')
+df_us['显示'] = df_us.apply(lambda r: f"{r['方向']} {abs(r['周涨跌幅(%)']):.2f}%", axis=1)
+df_us[['指数', '收盘价', '显示']].style \
+    .applymap(lambda v: 'color: red' if '▲' in str(v) else 'color: green',
+              subset=['显示']) \
+    .set_caption('美股主要指数周度表现')
+```
+
+# 全市场情绪指标
+
+本周市场情绪整体偏暖，赚钱效应较好：
+
+- 全周上涨家数/下跌家数比值：1.42（偏多）
+- 涨停/跌停比：4.23（偏多）
+- 周五涨停数89只，跌停仅6只
+- 两市日均成交9,885亿元，较上周增长6.2%
+
+# 北向资金
+
+本周北向资金合计净流入82.3亿元，其中周三单日净流入超40亿元，显示外资持续看好中国资产。沪股通净流入55.2亿元，深股通净流入27.1亿元。
+
+# 本章小结
+
+本周A股市场整体呈震荡上行态势，科创50以1.62%的周涨幅领跑，创业板指上涨1.31%，科技成长板块表现突出。北向资金全周净流入82.3亿元，市场情绪偏暖。综合判断当前市场为结构性行情，以科技成长为主线的上涨格局清晰。

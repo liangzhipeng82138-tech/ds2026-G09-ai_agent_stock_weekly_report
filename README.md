@@ -1,107 +1,124 @@
 # T-E2：AI Agent 自动生成股市周报
 
-| 项目   | 内容 |
-|--------|------|
-| 课程   | 数据分析与经济决策（ds2026） |
-| 题目   | T-E2：AI_Agent自动生成股市周报 |
-| 小组   | 第 09 组 |
-| 成员   | 梁志鹏（25210177）、吴璇子（25210264）、黄悦（25210145）、王鹤洋（25210243）、柯骋（25210150）、罗天（25210207）、易忠凯 |
-| GitHub | https://github.com/liangzhipeng82138-tech/ds2026-G09-ai_agent_stock_weekly_report |
-| Pages  | https://liangzhipeng82138-tech.github.io/ds2026-G09-ai_agent_stock_weekly_report/ |
-| 日期   | 2026-05-15 |
+> **课程**：数据分析与经济决策（ds2026）  
+> **题目**：T-E2：AI Agent自动生成股市周报  
+> **小组**：第09组  
+> **GitHub**：https://github.com/liangzhipeng82138-tech/ds2026-G09-ai_agent_stock_weekly_report  
+> **Pages**：https://liangzhipeng82138-tech.github.io/ds2026-G09-ai_agent_stock_weekly_report/
 
 ---
 
-## 项目简介
+## 📋 小组成员与分工
 
-本项目构建一个完整的自动化股市周报生成系统：每周自动拉取 A 股核心数据，调用 AI API 生成分析摘要，结合 Quarto 模板渲染成排版精美的 PDF 周报和 HTML 网页版。同时提供炫酷的静态 HTML 交互式周报页面。
-
-### 核心流程
-
-```
-数据获取 (akshare/yfinance) → 数据清洗 (pandas) → 分析与可视化 (matplotlib/plotly) → AI摘要生成 (Claude/GPT) → 排版渲染 (Quarto/HTML)
-```
-
----
-
-## 小组分工
-
-| 章节 | 负责人 | 核心内容 |
-|------|--------|----------|
-| 第1章 大盘整体行情 | 梁志鹏 | 核心指数涨跌幅、市场情绪、北向资金、全局定性 |
-| 第2章 板块与行业轮动 | 吴璇子 | 申万行业涨跌排名、热门题材、赛道轮动 |
-| 第3章 资金流向分析 | 黄悦 | 北向/主力/散户资金、龙虎榜、成交额 |
-| 第4章 重点个股与热点 | 王鹤洋 | 龙头股/黑马股、个股公告、连板分析 |
-| 第5章 宏观与政策面 | 柯骋 | CPI/PMI/社融、政策解读、外围市场 |
-| 第6章 风险与情绪研判 | 罗天 | 估值分析、恐慌指数、风险汇总 |
-| 第7章 下周展望与策略 | 易忠凯 | 走势预判、策略建议、全文汇总 |
+| 成员 | 学号 | 角色 | 负责章节 |
+|------|------|------|---------|
+| 梁志鹏 | 25210177 | 大盘整体行情分析师 | 第一章：大盘整体行情概览 |
+| 吴璇子 | 25210264 | 板块与行业轮动分析师 | 第二章：板块与行业轮动分析 |
+| 黄悦 | 25210145 | 资金流向分析师 | 第三章：资金流向分析 |
+| 王鹤洋 | 25210243 | 重点个股与热点事件分析师 | 第四章：重点个股与热点事件 |
+| 柯骋 | 25210150 | 宏观与政策面分析师 | 第五章：宏观与政策面分析 |
+| 罗天 | 25210207 | 风险与情绪研判分析师 | 第六章：风险与情绪研判 |
 
 ---
 
-## 项目目录结构
+## 📁 项目目录结构
 
 ```
-ds2026-G09-ai_agent_stock_weekly_report/
-├── readme.md                    ← 本文件
-├── index.html                   ← 第1章静态HTML周报
-├── pages/                       ← 其他章节HTML页面
-│   ├── index_2.html
-│   ├── index_3.html
-│   ├── index_4.html
-│   ├── index_5.html
-│   ├── index_6.html
-│   └── index_7.html
-├── data_raw/                    ← 原始数据（直接获取，不做修改）
-├── data_clean/                  ← 清洗后的数据
-├── output/                      ← 图表、报告、结果文件
-├── 01_get_data.ipynb            ← 数据获取
-├── 02_data_clean.ipynb          ← 数据清洗与整理
-├── 03_analysis.ipynb            ← 探索性/验证性分析
-├── 04_visualization.ipynb       ← 数据可视化
-├── _quarto.yml                  ← Quarto 项目配置
-├── report_template.qmd          ← 周报 Quarto 模板
+group_0518/
+├── index.html                      ← 炫酷静态HTML周报主页（左侧导航+章节切换）
+├── pages/
+│   ├── index_1.html                ← 第一章：大盘整体行情概览
+│   ├── index_2.html                ← 第二章：板块与行业轮动分析
+│   ├── index_3.html                ← 第三章：资金流向分析
+│   ├── index_4.html                ← 第四章：重点个股与热点事件
+│   ├── index_5.html                ← 第五章：宏观与政策面分析
+│   └── index_6.html                ← 第六章：风险与情绪研判
+├── menbers/
+│   ├── liangzhipeng/               ← 梁志鹏的Quarto文件
+│   │   ├── _quarto.yml
+│   │   └── index.qmd
+│   ├── wuxuanzi/                   ← 吴璇子的Quarto文件
+│   │   ├── _quarto.yml
+│   │   └── index.qmd
+│   ├── huangyue/                   ← 黄悦的Quarto文件
+│   │   ├── _quarto.yml
+│   │   └── index.qmd
+│   ├── wangheyang/                 ← 王鹤洋的Quarto文件
+│   │   ├── _quarto.yml
+│   │   └── index.qmd
+│   ├── kecheng/                    ← 柯骋的Quarto文件
+│   │   ├── _quarto.yml
+│   │   └── index.qmd
+│   └── luotian/                   ← 罗天的Quarto文件
+│       ├── _quarto.yml
+│       └── index.qmd
 ├── scripts/
-│   ├── 01_fetch_data.py         ← 数据获取脚本
-│   ├── 02_generate_summary.py   ← AI 生成摘要脚本
-│   └── 03_render_report.py      ← 调用 Quarto 渲染脚本
+│   ├── 01_fetch_data.py            ← 数据获取脚本（akshare + yfinance）
+│   ├── 02_generate_summary.py      ← AI摘要生成脚本（Claude/GPT API）
+│   └── 03_render_report.py         ← Quarto渲染脚本
 ├── data/
-│   └── history/                 ← 历史周报数据归档
-├── demo_static/
-│   └── demo_report.qmd          ← 静态演示版
+│   ├── weekly_data.json            ← 本周市场数据（JSON格式）
+│   └── history/                    ← 历史周报数据归档
+├── prompt/                         ← 作业要求文件
+│   ├── T-E2_AI_Agent自动生成股市周报.md
+│   ├── 小组成员与作业完成方案.md
+│   └── 小组作业要求.md
 ├── .github/
 │   └── workflows/
-│       └── weekly_report.yml    ← 定时触发 GitHub Actions
-└── prompt/                      ← 作业要求文档
+│       └── weekly_report.yml       ← GitHub Actions定时触发
+├── readme.md                       ← 本文件
+└── report_template.qmd            ← Quarto周报模板
 ```
 
 ---
 
-## AI 工具使用说明
+## 🚀 使用说明
 
-本项目使用了以下 AI 工具辅助开发：
+### 在线查看
 
-- **CodeBuddy (GLM-5.1)**：用于生成项目框架代码、HTML/CSS 页面设计、Notebook 代码骨架
-- **Claude API**：用于自动生成股市周报分析摘要文字
-- AI 生成的代码均已通过本地测试，分析结论在 AI 输出基础上进行了人工审校与补充
+直接打开 `index.html` 即可在浏览器中查看完整的股市周报，支持左侧导航切换章节。
 
----
-
-## 快速开始
+### 数据获取（自动化）
 
 ```bash
 # 安装依赖
-pip install akshare yfinance anthropic python-dotenv pandas matplotlib plotly
+pip install akshare yfinance anthropic python-dotenv pandas matplotlib
 
-# 获取数据
+# 1. 获取数据
 python scripts/01_fetch_data.py
 
-# 生成 AI 摘要（需设置 ANTHROPIC_API_KEY）
+# 2. 生成AI摘要（需设置ANTHROPIC_API_KEY或OPENAI_API_KEY环境变量）
 python scripts/02_generate_summary.py
 
-# 渲染 Quarto 报告
-quarto render report_template.qmd --to html,pdf
+# 3. 渲染Quarto报告
+python scripts/03_render_report.py
+```
+
+### Quarto渲染
+
+每位成员可在自己的目录下独立渲染：
+
+```bash
+cd menbers/liangzhipeng
+quarto render
 ```
 
 ---
 
-*最后更新：2026-05-16*
+## 🤖 AI工具使用说明
+
+本项目使用了以下AI工具：
+
+- **Cursor / CodeBuddy**：辅助编写代码和HTML页面
+
+所有AI生成的内容均经过小组成员审核和修改，确保数据准确性和分析合理性。
+
+---
+
+## 📊 本周报告摘要（2026-W20）
+
+本周A股市场整体呈震荡上行态势，科技成长板块领涨。科创50以1.62%的周涨幅领跑，创业板指上涨1.31%。通信、电子、计算机行业表现突出，受5G-A商用牌照发放和AI产业政策催化。北向资金全周净流入82.3亿元，重点加仓科技方向。央行MLF降息10bp释放宽松信号。但房地产链持续承压，消费复苏偏弱。综合判断当前市场为结构性行情，科技主线清晰。
+
+---
+
+*最后更新：2026-05-15*

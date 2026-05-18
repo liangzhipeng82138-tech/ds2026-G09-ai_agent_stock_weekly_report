@@ -1,0 +1,24 @@
+project:
+  type: book
+  output-dir: _book
+
+book:
+  title: "A股 & 美股周报 — 宏观与政策面分析"
+  subtitle: "2026年第20周（2026-05-11 至 2026-05-15）"
+  author: "柯骋（25210150）"
+  date: "2026-05-15"
+  chapters:
+    - index.qmd
+
+format:
+  html:
+    theme: darkly
+    toc: true
+    self-contained: true
+  pdf:
+    documentclass: article
+    papersize: a4
+    geometry: margin=2cm
+    include-in-header:
+      text: |
+        \usepackage{ctex}

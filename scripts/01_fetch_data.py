@@ -1,224 +1,140 @@
 """
-T-E2 AI Agent自动生成股市周报 — 数据获取脚本
+01_fetch_data.py - 数据获取脚本
+通过akshare和yfinance获取A股和美股主要指数、行业、资金流向等周度数据
 
-功能：
-1. 获取六大核心指数日线行情（上证/深证/创业板/科创50/沪深300/中证500）
-2. 获取全市场涨跌家数和涨跌停数据
-3. 获取北向资金流向数据
-4. 获取两市成交额数据
-5. 获取美股三大指数作为外围参考
-
-输出：data/weekly_data.json + data_raw/ 目录下各CSV文件
+| 项目   | 内容 |
+|--------|------|
+| 课程   | 数据分析与经济决策（ds2026） |
+| 题目   | T-E2：AI Agent自动生成股市周报 |
+| 小组   | 第09组 |
+| 成员   | 梁志鹏（25210177）、吴璇子（25210264）、黄悦（25210145）、王鹤洋（25210243）、柯骋（25210150）、罗天（25210207） |
+| GitHub | https://github.com/liangzhipeng82138-tech/ds2026-G09-ai_agent_stock_weekly_report |
+| Pages  | https://liangzhipeng82138-tech.github.io/ds2026-G09-ai_agent_stock_weekly_report/ |
+| 日期   | 2026-05-15 |
 """
 
 import akshare as ak
 import yfinance as yf
-import pandas as pd
 import json
-import os
-import time
+import pandas as pd
 from datetime import datetime, timedelta
 
 
-# ===== 配置 =====
-INDEX_MAP = {
-    '上证指数': 'sh000001',
-    '深证成指': 'sz399001',
-    '创业板指': 'sz399006',
-    '科创50':  'sh000688',
-    '沪深300': 'sh000300',
-    '中证500': 'sh000905',
-}
-
-US_INDEX = {
-    '道琼斯': '^DJI',
-    '标普500': '^GSPC',
-    '纳斯达克': '^IXIC',
-}
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_RAW_DIR = os.path.join(BASE_DIR, 'data_raw')
-DATA_DIR = os.path.join(BASE_DIR, 'data')
-
-
-def ensure_dirs():
-    """创建必要的目录"""
-    for d in [DATA_RAW_DIR, DATA_DIR, os.path.join(DATA_DIR, 'history')]:
-        os.makedirs(d, exist_ok=True)
-    print(f'目录已就绪: {DATA_RAW_DIR}, {DATA_DIR}')
-
-
-def fetch_index_data():
-    """获取A股核心指数日线数据"""
-    results = {}
-    
-    for name, code in INDEX_MAP.items():
+def get_a_share_indices():
+    """获取A股主要指数周度数据"""
+    indices = {
+        '上证指数': 'sh000001',
+        '深证成指': 'sz399001',
+        '创业板指': 'sz399006',
+        '科创50': 'sh000688',
+        '沪深300': 'sh000300',
+        '中证500': 'sh000905',
+    }
+    result = {}
+    for name, symbol in indices.items():
         try:
-            print(f'正在获取 {name} ({code}) ...')
-            df = ak.stock_zh_index_daily(symbol=code)
-            df = df.tail(15).copy()
-            df['date'] = pd.to_datetime(df['date'])
-            df = df.sort_values('date').reset_index(drop=True)
-            
-            # 保存原始数据
-            raw_path = os.path.join(DATA_RAW_DIR, f'index_{name}.csv')
-            df.to_csv(raw_path, index=False, encoding='utf-8-sig')
-            
-            # 计算本周指标
-            if len(df) >= 6:
-                this_week_close = float(df['close'].iloc[-1])
-                last_week_close = float(df['close'].iloc[-6])
-                weekly_return = (this_week_close / last_week_close - 1) * 100
-                
-                this_week_high = float(df.tail(5)['high'].max())
-                this_week_low = float(df.tail(5)['low'].min())
-                amplitude = (this_week_high - this_week_low) / last_week_close * 100
-                
-                results[name] = {
-                    'close': this_week_close,
-                    'last_week_close': last_week_close,
-                    'change_pct': round(weekly_return, 2),
-                    'amplitude': round(amplitude, 2),
-                    'date': str(df['date'].iloc[-1].strftime('%Y-%m-%d')),
-                }
-            
-            print(f'  ✓ {name}: 收盘={results.get(name, {}).get("close", "N/A")}, 涨跌幅={results.get(name, {}).get("change_pct", "N/A")}%')
-            time.sleep(0.5)  # 避免请求过快
-            
-        except Exception as e:
-            print(f'  ✗ {name} 获取失败: {e}')
-            results[name] = None
-    
-    return results
-
-
-def fetch_market_sentiment():
-    """获取全市场涨跌家数统计"""
-    try:
-        print('正在获取全市场行情 ...')
-        spot_df = ak.stock_zh_a_spot_em()
-        
-        # 保存原始数据
-        raw_path = os.path.join(DATA_RAW_DIR, 'stock_spot_all.csv')
-        spot_df.to_csv(raw_path, index=False, encoding='utf-8-sig')
-        
-        # 统计涨跌家数
-        change_col = None
-        for col in spot_df.columns:
-            if '涨跌幅' in str(col):
-                change_col = col
-                break
-        
-        if change_col:
-            valid = spot_df.dropna(subset=[change_col])
-            rise = int((valid[change_col] > 0).sum())
-            fall = int((valid[change_col] < 0).sum())
-            flat = int((valid[change_col] == 0).sum())
-            limit_up = int((valid[change_col] >= 9.9).sum())
-            limit_down = int((valid[change_col] <= -9.9).sum())
-            
-            sentiment = {
-                'rise_count': rise,
-                'fall_count': fall,
-                'flat_count': flat,
-                'limit_up': limit_up,
-                'limit_down': limit_down,
-                'profit_rate': round(rise / len(valid) * 100, 1),
+            df = ak.stock_zh_index_daily(symbol=symbol)
+            df = df.tail(10)
+            weekly_return = (df['close'].iloc[-1] / df['close'].iloc[-6] - 1) * 100
+            amplitude = ((df['high'].iloc[-5:].max() - df['low'].iloc[-5:].min()) / df['close'].iloc[-6]) * 100
+            result[name] = {
+                'close': float(df['close'].iloc[-1]),
+                'prev_close': float(df['close'].iloc[-6]),
+                'change_pct': round(float(weekly_return), 2),
+                'amplitude': round(float(amplitude), 2),
+                'date': str(df.index[-1]) if hasattr(df.index, '__getitem__') else str(datetime.now().date())
             }
-            print(f'  ✓ 上涨{rise}家, 下跌{fall}家, 涨停{limit_up}, 跌停{limit_down}')
-            return sentiment
-        else:
-            print(f'  ✗ 未找到涨跌幅列, 可用列: {list(spot_df.columns)}')
-            return None
-            
-    except Exception as e:
-        print(f'  ✗ 市场情绪获取失败: {e}')
-        return None
+            print(f'  ✅ {name}: 收盘{result[name]["close"]}, 周涨跌{result[name]["change_pct"]}%')
+        except Exception as e:
+            print(f'  ❌ {name}获取失败：{e}')
+    return result
 
 
-def fetch_northbound_flow():
-    """获取北向资金流向数据"""
+def get_us_indices():
+    """获取美股三大指数数据"""
+    tickers = {
+        '标普500': '^GSPC',
+        '纳斯达克': '^IXIC',
+        '道琼斯': '^DJI',
+    }
+    result = {}
+    for name, ticker in tickers.items():
+        try:
+            data = yf.download(ticker, period='10d', progress=False)
+            if len(data) >= 6:
+                weekly_return = (data['Close'].iloc[-1] / data['Close'].iloc[-6] - 1) * 100
+                result[name] = {
+                    'close': round(float(data['Close'].iloc[-1]), 2),
+                    'prev_close': round(float(data['Close'].iloc[-6]), 2),
+                    'change_pct': round(float(weekly_return), 2),
+                }
+                print(f'  ✅ {name}: 收盘{result[name]["close"]}, 周涨跌{result[name]["change_pct"]}%')
+        except Exception as e:
+            print(f'  ❌ {name}获取失败：{e}')
+    return result
+
+
+def get_sw_sectors():
+    """获取申万一级行业涨跌幅数据"""
     try:
-        print('正在获取北向资金数据 ...')
-        nb_df = ak.stock_hsgt_north_net_flow_in_em(symbol='北向')
-        nb_df = nb_df.tail(15).copy()
-        
-        # 保存原始数据
-        raw_path = os.path.join(DATA_RAW_DIR, 'northbound_flow.csv')
-        nb_df.to_csv(raw_path, index=False, encoding='utf-8-sig')
-        
-        # 提取本周数据
-        weekly_data = nb_df.tail(5).to_dict(orient='records')
-        print(f'  ✓ 北向资金: 获取到 {len(nb_df)} 条记录')
-        return weekly_data
-        
+        # 尝试获取申万行业数据
+        df = ak.sw_index_daily_indicator(symbol='801010', indicator='近一周')
+        return df.to_dict(orient='records')
     except Exception as e:
-        print(f'  ✗ 北向资金获取失败: {e}')
+        print(f'  ⚠️ 行业数据获取失败：{e}，将使用备选方案')
         return []
 
 
-def fetch_us_index():
-    """获取美股三大指数数据"""
-    results = {}
-    
-    for name, ticker in US_INDEX.items():
-        try:
-            print(f'正在获取 {name} ({ticker}) ...')
-            df = yf.download(ticker, period='15d', progress=False)
-            if not df.empty:
-                close = float(df['Close'].iloc[-1])
-                prev_close = float(df['Close'].iloc[-6]) if len(df) >= 6 else close
-                change_pct = (close / prev_close - 1) * 100
-                
-                results[name] = {
-                    'close': round(close, 2),
-                    'change_pct': round(change_pct, 2),
-                }
-                print(f'  ✓ {name}: 收盘={close:.2f}, 涨跌幅={change_pct:+.2f}%')
-        except Exception as e:
-            print(f'  ✗ {name} 获取失败: {e}')
-            results[name] = None
-    
-    return results
+def get_northbound_data():
+    """获取北向资金数据"""
+    try:
+        df = ak.stock_em_hsgt_north_net_flow_in_em(symbol="北向资金")
+        recent = df.tail(5)
+        return {
+            'weekly_net_flow': float(recent['当日净买入'].sum()),
+            'daily_data': recent.to_dict(orient='records')
+        }
+    except Exception as e:
+        print(f'  ⚠️ 北向资金数据获取失败：{e}')
+        return {}
 
 
-def main():
-    """主函数：获取所有数据并保存"""
+def get_weekly_data():
+    """主函数：获取本周市场全量数据"""
     print('=' * 50)
-    print('AI Agent 股市周报 — 数据获取')
-    print(f'运行时间: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
+    print('📊 开始获取周度市场数据...')
     print('=' * 50)
-    
-    ensure_dirs()
-    
-    # 获取数据
-    index_data = fetch_index_data()
-    sentiment = fetch_market_sentiment()
-    northbound = fetch_northbound_flow()
-    us_data = fetch_us_index()
-    
-    # 汇总为 JSON
-    weekly_data = {
-        'report_date': datetime.now().strftime('%Y-%m-%d'),
-        'period': {
-            'start': (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d'),
-            'end': datetime.now().strftime('%Y-%m-%d'),
-        },
-        'indices': {k: v for k, v in index_data.items() if v is not None},
-        'sentiment': sentiment,
-        'northbound': northbound,
-        'us_indices': {k: v for k, v in us_data.items() if v is not None},
+
+    data = {
+        'report_info': {
+            'title': 'A股 & 美股周报',
+            'subtitle': f'第{datetime.now().isocalendar()[1]}周（{(datetime.now() - timedelta(days=datetime.now().weekday())).strftime("%Y-%m-%d")} 至 {datetime.now().strftime("%Y-%m-%d")}）',
+            'author': 'ds2026 第09组',
+            'date': datetime.now().strftime('%Y-%m-%d'),
+        }
     }
-    
-    # 保存
-    output_path = os.path.join(DATA_DIR, 'weekly_data.json')
+
+    print('\n📈 [1/4] 获取A股主要指数...')
+    data['a_share_indices'] = get_a_share_indices()
+
+    print('\n📈 [2/4] 获取美股主要指数...')
+    data['us_indices'] = get_us_indices()
+
+    print('\n📊 [3/4] 获取申万行业数据...')
+    data['sw_sectors'] = get_sw_sectors()
+
+    print('\n💰 [4/4] 获取北向资金数据...')
+    data['northbound'] = get_northbound_data()
+
+    # 保存数据
+    output_path = '../data/weekly_data.json'
     with open(output_path, 'w', encoding='utf-8') as f:
-        json.dump(weekly_data, f, ensure_ascii=False, indent=2, default=str)
-    
-    print(f'\n数据已保存至: {output_path}')
-    print(f'数据项: {len(weekly_data)} 个')
-    print('✓ 数据获取完成！')
+        json.dump(data, f, ensure_ascii=False, indent=2, default=str)
+
+    print(f'\n✅ 数据获取完成！已保存至 {output_path}')
+    print(f'   共获取 {len(data)} 个数据维度')
+    return data
 
 
 if __name__ == '__main__':
-    main()
+    get_weekly_data()

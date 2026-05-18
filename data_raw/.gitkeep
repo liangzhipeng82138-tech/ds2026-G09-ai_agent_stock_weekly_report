@@ -1,2 +1,0 @@
-此目录存放原始数据文件（直接获取，不做修改）。
-由 01_get_data.ipynb 或 scripts/01_fetch_data.py 生成。

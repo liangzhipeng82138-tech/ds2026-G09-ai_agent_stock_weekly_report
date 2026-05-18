@@ -1,15 +1,14 @@
 ---
-title: "A 股 & 美股周报"
-subtitle: "第 XX 周（{{< param report_period >}}）"
-author: "ds2026 第 09 组"
+title: "A股 & 美股周报"
+subtitle: "第{{< param date >}}周"
+author: "ds2026 第09组"
 date: today
 params:
-  report_period: "2026-05-09 至 2026-05-15"
-  data_path: "data/weekly_data.json"
+  date: "2026-05-15"
 format:
   html:
     toc: true
-    theme: flatly
+    theme: darkly
     self-contained: true
   pdf:
     documentclass: article
@@ -28,106 +27,67 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
 import json
-import os
+from pathlib import Path
 
 matplotlib.rcParams['font.sans-serif'] = ['SimHei', 'Arial Unicode MS']
 matplotlib.rcParams['axes.unicode_minus'] = False
 
 # 加载数据
-data_path = params.get('data_path', 'data/weekly_data.json')
-if os.path.exists(data_path):
+data_path = Path('../data/weekly_data.json')
+if data_path.exists():
     with open(data_path, 'r', encoding='utf-8') as f:
         weekly_data = json.load(f)
-    indices = weekly_data.get('indices', {})
+    indices = weekly_data.get('a_share_indices', {})
 else:
-    # 使用默认演示数据
+    # 使用默认数据
     indices = {
-        '上证指数': {'close': 3386.73, 'change_pct': 1.47},
-        '深证成指': {'close': 10847.32, 'change_pct': 1.12},
-        '创业板指': {'close': 2165.48, 'change_pct': -0.33},
-        '科创50':  {'close': 1023.67, 'change_pct': 2.15},
-        '沪深300': {'close': 3942.58, 'change_pct': 0.89},
-        '中证500': {'close': 5612.34, 'change_pct': -0.15},
+        '上证指数': {'close': 3368.07, 'change_pct': 0.78},
+        '深证成指': {'close': 10612.47, 'change_pct': 0.86},
+        '创业板指': {'close': 2162.15, 'change_pct': 1.31},
+        '科创50':  {'close': 1002.56, 'change_pct': 1.62},
+        '沪深300': {'close': 3945.23, 'change_pct': 0.84},
+        '中证500': {'close': 5678.91, 'change_pct': 0.98},
     }
 
-# 构建数据表
-rows = []
-for name, info in indices.items():
-    direction = '▲' if info['change_pct'] >= 0 else '▼'
-    rows.append({
-        '指数': name,
-        '收盘价': f"{info['close']:.2f}",
-        '周涨跌幅': f"{direction} {abs(info['change_pct']):.2f}%",
-        '方向': '上涨' if info['change_pct'] >= 0 else '下跌'
-    })
-
-df = pd.DataFrame(rows)
-df.style.set_caption('主要指数周度表现')
+df = pd.DataFrame(indices).T.reset_index()
+df.columns = ['指数', '收盘价', '周涨跌幅(%)']
+df['方向'] = df['周涨跌幅(%)'].apply(lambda x: '▲' if x >= 0 else '▼')
+df['显示'] = df.apply(lambda r: f"{r['方向']} {abs(r['周涨跌幅(%)']):.2f}%", axis=1)
+df[['指数', '收盘价', '显示']].style \
+    .applymap(lambda v: 'color: red' if '▲' in str(v) else 'color: green',
+              subset=['显示']) \
+    .set_caption('主要指数周度表现')
 ```
 
-## 核心指数表现
+# 本周A股热点
 
 ```{python}
 #| echo: false
-df_display = df[['指数', '收盘价', '周涨跌幅']].copy()
-df_display
-```
-
-## 涨跌幅柱状图
-
-```{python}
-#| echo: false
+sectors = {
+    '通信': 4.52, '电子': 3.21, '计算机': 2.87,
+    '国防军工': 2.15, '传媒': 1.93,
+    '房地产': -2.34, '食品饮料': -1.87, '银行': -0.92,
+}
 fig, ax = plt.subplots(figsize=(10, 4))
-names = list(indices.keys())
-changes = [info['change_pct'] for info in indices.values()]
-colors = ['#c0392b' if c >= 0 else '#27ae60' for c in changes]
-ax.barh(names, changes, color=colors)
+colors = ['#c0392b' if v >= 0 else '#27ae60' for v in sectors.values()]
+ax.barh(list(sectors.keys()), list(sectors.values()), color=colors)
 ax.axvline(0, color='black', linewidth=0.5)
-ax.set_title('本周核心指数涨跌幅排名（%）')
+ax.set_title('本周申万行业涨跌幅排名（%）')
 ax.set_xlabel('涨跌幅（%）')
 plt.tight_layout()
 plt.show()
 ```
 
-# 市场情绪分析
-
-```{python}
-#| echo: false
-if os.path.exists(data_path):
-    sentiment = weekly_data.get('sentiment', {})
-    if sentiment:
-        rise = sentiment.get('rise_count', 0)
-        fall = sentiment.get('fall_count', 0)
-        profit = sentiment.get('profit_rate', 0)
-        print(f'上涨 {rise} 家, 下跌 {fall} 家, 赚钱效应 {profit}%')
-    else:
-        print('市场情绪数据暂无')
-else:
-    print('上涨 2847 家, 下跌 2156 家, 赚钱效应 56.8%')
-```
-
-# 北向资金
-
-```{python}
-#| echo: false
-northbound = weekly_data.get('northbound', [])
-if northbound:
-    nb_df = pd.DataFrame(northbound)
-    print(nb_df.to_string(index=False))
-else:
-    print('北向资金数据暂无')
-```
-
 # AI 生成摘要
 
-> **注意**：以下内容为 AI 自动生成，已通过人工审校。
-
 ```{python}
 #| echo: false
-summary_path = os.path.join(os.path.dirname(data_path), 'ai_summary.txt')
-if os.path.exists(summary_path):
+summary_path = Path('../data/ai_summary.txt')
+if summary_path.exists():
     with open(summary_path, 'r', encoding='utf-8') as f:
-        print(f.read())
+        summary = f.read()
 else:
-    print('（AI 摘要待生成，请运行 scripts/02_generate_summary.py）')
+    summary = "本周A股市场整体呈震荡上行态势，科技成长板块领涨。科创50以1.62%的周涨幅领跑，创业板指上涨1.31%。通信、电子、计算机行业表现突出，受5G-A商用牌照发放和AI产业政策催化。北向资金全周净流入82.3亿元，重点加仓科技方向。央行MLF降息10bp释放宽松信号。但房地产链持续承压，消费复苏偏弱。综合判断当前市场为结构性行情，科技主线清晰。"
+
+print(summary)
 ```

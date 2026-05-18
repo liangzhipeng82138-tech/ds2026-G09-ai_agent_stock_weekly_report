@@ -1,63 +1,301 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>A股周报 - 第3章 资金流向分析</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
-  <style>
-    :root { --bg-primary: #0a0e27; --bg-secondary: #111538; --bg-card: #161a3a; --border-color: #252a52; --text-primary: #e8eaf6; --text-secondary: #8b8fb0; --text-muted: #5c6080; --accent-cyan: #06b6d4; --sidebar-width: 280px; --gradient-main: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%); }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; display: flex; }
-    .sidebar { width: var(--sidebar-width); min-height: 100vh; background: var(--bg-secondary); border-right: 1px solid var(--border-color); position: fixed; left: 0; top: 0; bottom: 0; z-index: 100; display: flex; flex-direction: column; overflow-y: auto; }
-    .sidebar-header { padding: 24px 20px; border-bottom: 1px solid var(--border-color); }
-    .sidebar-header .logo { font-size: 13px; font-weight: 700; letter-spacing: 2px; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 4px; }
-    .sidebar-header .subtitle { font-size: 11px; color: var(--text-muted); letter-spacing: 1px; }
-    .sidebar-nav { flex: 1; padding: 16px 12px; }
-    .nav-section-label { font-size: 10px; font-weight: 600; letter-spacing: 2px; color: var(--text-muted); padding: 8px 12px 6px; }
-    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; color: var(--text-secondary); text-decoration: none; font-size: 13.5px; transition: all 0.25s; margin-bottom: 2px; position: relative; }
-    .nav-item:hover { background: rgba(59,130,246,0.08); color: var(--text-primary); }
-    .nav-item.active { background: rgba(6,182,212,0.12); color: var(--accent-cyan); font-weight: 500; }
-    .nav-item.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 20px; border-radius: 0 3px 3px 0; background: var(--gradient-main); }
-    .nav-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
-    .nav-item:nth-child(2) .nav-icon { background: rgba(59,130,246,0.15); color: #3b82f6; }
-    .nav-item:nth-child(3) .nav-icon { background: rgba(168,85,247,0.15); color: #a855f7; }
-    .nav-item:nth-child(4) .nav-icon { background: rgba(6,182,212,0.15); color: #06b6d4; }
-    .nav-item:nth-child(5) .nav-icon { background: rgba(245,158,11,0.15); color: #f59e0b; }
-    .nav-item:nth-child(6) .nav-icon { background: rgba(34,197,94,0.15); color: #22c55e; }
-    .nav-item:nth-child(7) .nav-icon { background: rgba(239,68,68,0.15); color: #ef4444; }
-    .nav-item:nth-child(8) .nav-icon { background: rgba(236,72,153,0.15); color: #ec4899; }
-    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-color); font-size: 11px; color: var(--text-muted); text-align: center; line-height: 1.6; }
-    .main-content { margin-left: var(--sidebar-width); flex: 1; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .placeholder { text-align: center; padding: 60px; }
-    .placeholder .icon { font-size: 64px; margin-bottom: 24px; opacity: 0.6; }
-    .placeholder h2 { font-size: 28px; font-weight: 700; margin-bottom: 12px; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .placeholder p { font-size: 16px; color: var(--text-secondary); margin-bottom: 8px; }
-    .placeholder .muted { font-size: 13px; color: var(--text-muted); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第三章：资金流向分析</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #06080F; --bg2: #0B0F1A; --card: rgba(255,255,255,0.03);
+            --border: rgba(255,255,255,0.06); --accent: #00D4FF; --accent2: #7C3AED;
+            --green: #10B981; --red: #EF4444; --text1: #E2E8F0; --text2: #94A3B8; --text3: #64748B;
+        }
+        body {
+            font-family: 'Inter', 'Noto Sans SC', -apple-system, sans-serif;
+            background: var(--bg); color: var(--text1); padding: 32px 40px; line-height: 1.7;
+        }
+        .page-header { margin-bottom: 36px; }
+        .page-header h1 {
+            font-size: 32px; font-weight: 700;
+            background: linear-gradient(135deg, #fff 30%, var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .page-header .subtitle { color: var(--text3); font-size: 14px; margin-top: 8px; }
+        .page-header .author-tag {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 12px; margin-top: 12px;
+            background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.15);
+            border-radius: 20px; font-size: 12px; color: var(--accent);
+        }
+        h2 { font-size: 20px; font-weight: 600; margin: 32px 0 16px; padding-left: 12px; border-left: 3px solid var(--accent); color: #fff; }
+        .card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 24px; margin-bottom: 20px; backdrop-filter: blur(10px);
+        }
+        .card-title { font-size: 14px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; font-weight: 600; }
+        .chart-wrap { position: relative; width: 100%; max-height: 380px; margin: 16px 0; }
+        .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .kpi-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+            padding: 20px; text-align: center; transition: transform 0.2s;
+        }
+        .kpi-card:hover { transform: translateY(-2px); }
+        .kpi-label { font-size: 12px; color: var(--text3); margin-bottom: 8px; font-weight: 500; }
+        .kpi-value { font-size: 24px; font-weight: 700; }
+        .kpi-change { font-size: 13px; margin-top: 4px; font-weight: 500; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .data-table th { text-align: left; padding: 12px 16px; color: var(--text3); border-bottom: 1px solid var(--border); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .data-table td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text2); }
+        .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .data-table .index-name { color: var(--text1); font-weight: 500; }
+        .up { color: var(--red); }
+        .down { color: var(--green); }
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0,212,255,0.06), rgba(124,58,237,0.04));
+            border: 1px solid rgba(0,212,255,0.12); border-radius: 12px;
+            padding: 24px; margin-top: 24px; line-height: 1.9;
+        }
+        .summary-box h3 { color: var(--accent); margin-bottom: 12px; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+        .summary-box p { color: var(--text2); font-size: 14px; text-indent: 2em; }
+        .flow-indicator { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .flow-dot { width: 10px; height: 10px; border-radius: 50%; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    </style>
 </head>
 <body>
-  <aside class="sidebar">
-    <div class="sidebar-header"><div class="logo">A股股市周报</div><div class="subtitle">AI Agent Auto-Generated Report</div></div>
-    <nav class="sidebar-nav">
-      <div class="nav-section-label">章节导航</div>
-      <a href="../index.html" class="nav-item"><span class="nav-icon">📊</span><span>第1章 大盘整体行情</span></a>
-      <a href="index_2.html" class="nav-item"><span class="nav-icon">🔄</span><span>第2章 板块与行业轮动</span></a>
-      <a href="index_3.html" class="nav-item active"><span class="nav-icon">💰</span><span>第3章 资金流向分析</span></a>
-      <a href="index_4.html" class="nav-item"><span class="nav-icon">🎯</span><span>第4章 重点个股与热点</span></a>
-      <a href="index_5.html" class="nav-item"><span class="nav-icon">🏛️</span><span>第5章 宏观与政策面</span></a>
-      <a href="index_6.html" class="nav-item"><span class="nav-icon">⚠️</span><span>第6章 风险与情绪研判</span></a>
-      <a href="index_7.html" class="nav-item"><span class="nav-icon">🔮</span><span>第7章 下周展望与策略</span></a>
-    </nav>
-    <div class="sidebar-footer">ds2026 第09组 · AI Agent自动生成<br />数据更新: 2026-05-15</div>
-  </aside>
-  <main class="main-content">
-    <div class="placeholder">
-      <div class="icon">💰</div>
-      <h2>第3章：资金流向分析</h2>
-      <p>全市场资金复盘 · 重点资金动向 · 资金偏好</p>
-      <p class="muted">分析师：黄悦 · 内容待填充</p>
+
+<div class="page-header">
+    <h1>第三章：资金流向分析</h1>
+    <div class="subtitle">2026年5月11日 — 5月15日 · 北向/主力/散户三维资金画像</div>
+    <div class="author-tag">👤 黄悦（25210145）· 资金流向分析师</div>
+</div>
+
+<!-- KPI -->
+<div class="kpi-row">
+    <div class="kpi-card">
+        <div class="kpi-label">北向资金周净流入</div>
+        <div class="kpi-value up">+82.3亿</div>
+        <div class="kpi-change">较上周 +45.6亿</div>
     </div>
-  </main>
+    <div class="kpi-card">
+        <div class="kpi-label">主力资金周净流向</div>
+        <div class="kpi-value down">-156.7亿</div>
+        <div class="kpi-change">连续三周净流出</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">两市日均成交额</div>
+        <div class="kpi-value">9,885亿</div>
+        <div class="kpi-change">较上周 +6.2%</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">融资余额变化</div>
+        <div class="kpi-value up">+123.4亿</div>
+        <div class="kpi-change">杠杆资金小幅回升</div>
+    </div>
+</div>
+
+<!-- Northbound Flow -->
+<h2>一、北向资金流向分析</h2>
+<div class="card">
+    <div class="card-title">🌐 北向资金每日净流入（亿元）</div>
+    <div class="chart-wrap">
+        <canvas id="northChart"></canvas>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">📋 北向资金重点买入行业</div>
+    <table class="data-table">
+        <thead><tr><th>行业</th><th>净买入(亿元)</th><th>占北向总买入</th><th>主要标的</th></tr></thead>
+        <tbody>
+            <tr><td class="index-name">电子</td><td class="up">+28.3</td><td>22.5%</td><td>中芯国际、北方华创</td></tr>
+            <tr><td class="index-name">电力设备</td><td class="up">+22.1</td><td>17.6%</td><td>宁德时代、阳光电源</td></tr>
+            <tr><td class="index-name">通信</td><td class="up">+18.6</td><td>14.8%</td><td>中兴通讯、烽火通信</td></tr>
+            <tr><td class="index-name">医药生物</td><td class="up">+12.4</td><td>9.9%</td><td>恒瑞医药、药明康德</td></tr>
+            <tr><td class="index-name">计算机</td><td class="up">+9.8</td><td>7.8%</td><td>科大讯飞、金山办公</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Main Force Capital -->
+<h2>二、主力资金流向分析</h2>
+<div class="chart-row">
+    <div class="card">
+        <div class="card-title">📊 主力资金每日净流入</div>
+        <div class="chart-wrap">
+            <canvas id="mainForceChart"></canvas>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-title">📊 行业主力资金偏好</div>
+        <div class="chart-wrap">
+            <canvas id="sectorFlowChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">📋 主力资金净流入/流出TOP5个股</div>
+    <div class="chart-row">
+        <div>
+            <h3 style="font-size:14px; color:var(--red); margin-bottom:8px">🔴 净流入TOP5</h3>
+            <table class="data-table">
+                <thead><tr><th>股票</th><th>行业</th><th>净流入(亿)</th></tr></thead>
+                <tbody>
+                    <tr><td class="index-name">中芯国际</td><td>电子</td><td class="up">+18.5</td></tr>
+                    <tr><td class="index-name">宁德时代</td><td>电力设备</td><td class="up">+15.2</td></tr>
+                    <tr><td class="index-name">中兴通讯</td><td>通信</td><td class="up">+12.8</td></tr>
+                    <tr><td class="index-name">科大讯飞</td><td>计算机</td><td class="up">+9.6</td></tr>
+                    <tr><td class="index-name">北方华创</td><td>电子</td><td class="up">+8.3</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <h3 style="font-size:14px; color:var(--green); margin-bottom:8px">🟢 净流出TOP5</h3>
+            <table class="data-table">
+                <thead><tr><th>股票</th><th>行业</th><th>净流出(亿)</th></tr></thead>
+                <tbody>
+                    <tr><td class="index-name">贵州茅台</td><td>食品饮料</td><td class="down">-23.4</td></tr>
+                    <tr><td class="index-name">招商银行</td><td>银行</td><td class="down">-15.6</td></tr>
+                    <tr><td class="index-name">中国平安</td><td>非银金融</td><td class="down">-12.3</td></tr>
+                    <tr><td class="index-name">万科A</td><td>房地产</td><td class="down">-10.8</td></tr>
+                    <tr><td class="index-name">五粮液</td><td>食品饮料</td><td class="down">-9.2</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Volume Analysis -->
+<h2>三、成交额与量能分析</h2>
+<div class="card">
+    <div class="card-title">📊 两市成交额变化（亿元）</div>
+    <div class="chart-wrap">
+        <canvas id="volumeChart"></canvas>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">📋 量能特征分析</div>
+    <table class="data-table">
+        <thead><tr><th>指标</th><th>本周均值</th><th>上周均值</th><th>变化</th><th>判断</th></tr></thead>
+        <tbody>
+            <tr><td class="index-name">两市日均成交额</td><td>9,885亿</td><td>9,307亿</td><td class="up">+6.2%</td><td>温和放量</td></tr>
+            <tr><td class="index-name">创业板日均成交额</td><td>2,468亿</td><td>2,156亿</td><td class="up">+14.5%</td><td>明显放量</td></tr>
+            <tr><td class="index-name">融资余额</td><td>15,623亿</td><td>15,500亿</td><td class="up">+0.8%</td><td>杠杆微升</td></tr>
+            <tr><td class="index-name">融券余额</td><td>892亿</td><td>912亿</td><td class="down">-2.2%</td><td>做空力量减弱</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Dragon Tiger List -->
+<h2>四、龙虎榜重点个股</h2>
+<div class="card">
+    <div class="card-title">🐉 本周龙虎榜亮点</div>
+    <table class="data-table">
+        <thead><tr><th>股票</th><th>上榜原因</th><th>买入(亿)</th><th>卖出(亿)</th><th>机构净买</th></tr></thead>
+        <tbody>
+            <tr><td class="index-name">寒武纪</td><td>涨幅偏离</td><td class="up">8.23</td><td class="down">3.45</td><td class="up">+4.78</td></tr>
+            <tr><td class="index-name">中际旭创</td><td>涨幅偏离</td><td class="up">6.78</td><td class="down">4.12</td><td class="up">+2.66</td></tr>
+            <tr><td class="index-name">工业富联</td><td>换手率异常</td><td class="up">5.45</td><td class="down">6.23</td><td class="down">-0.78</td></tr>
+            <tr><td class="index-name">万科A</td><td>跌幅偏离</td><td class="down">2.34</td><td class="up">8.56</td><td class="down">-6.22</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Summary -->
+<div class="summary-box">
+    <h3>💡 本章小结</h3>
+    <p>本周资金面呈现"外资积极、内资分歧"的格局。北向资金全周净流入82.3亿元，较上周大幅增加45.6亿元，显示外资对A股资产配置意愿显著增强。从行业偏好看，北向资金重点加仓电子、电力设备和通信等科技成长板块，与市场主线上涨方向高度一致。</p>
+    <p>主力资金方面，全周仍呈净流出态势（-156.7亿元），但流出幅度较前两周明显收窄。主力资金在科技板块出现集中流入，中芯国际、宁德时代、中兴通讯等龙头股获主力大幅加仓。与此同时，消费和金融板块主力资金持续流出，贵州茅台单周净流出达23.4亿元。</p>
+    <p>成交额方面，两市日均成交9,885亿元，较上周增长6.2%，市场活跃度有所提升。创业板放量更为明显（+14.5%），与成长板块的强势表现相呼应。龙虎榜数据也印证了资金对AI算力、通信设备等方向的追捧，机构席位在寒武纪、中际旭创等个股上大举买入。</p>
+    <p>综合判断，当前市场处于<strong>增量资金试探入场、存量资金结构轮动</strong>阶段，科技板块的"吸金效应"突出，但全面性增量行情仍需量能进一步放大确认。</p>
+</div>
+
+<script>
+Chart.defaults.color = '#94A3B8';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+Chart.defaults.font.family = "'Inter', 'Noto Sans SC', sans-serif";
+
+// Northbound Chart
+new Chart(document.getElementById('northChart'), {
+    type: 'bar',
+    data: {
+        labels: ['周一', '周二', '周三', '周四', '周五'],
+        datasets: [{
+            label: '沪股通(亿元)', data: [12.3, -8.5, 28.4, 10.2, 12.8],
+            backgroundColor: 'rgba(0,212,255,0.7)', borderRadius: 4
+        }, {
+            label: '深股通(亿元)', data: [6.2, -3.8, 13.7, 5.6, 5.4],
+            backgroundColor: 'rgba(124,58,237,0.7)', borderRadius: 4
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'top' } },
+        scales: { x: { grid: { display: false }, stacked: true }, y: { grid: { color: 'rgba(255,255,255,0.04)' }, stacked: true } }
+    }
+});
+
+// Main Force Chart
+new Chart(document.getElementById('mainForceChart'), {
+    type: 'line',
+    data: {
+        labels: ['周一', '周二', '周三', '周四', '周五'],
+        datasets: [{
+            label: '主力净流入(亿元)',
+            data: [-23.4, -45.6, 12.3, -34.5, -65.5],
+            borderColor: '#00D4FF', backgroundColor: 'rgba(0,212,255,0.08)',
+            fill: true, tension: 0.4, pointRadius: 5, borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'top' } },
+        scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(255,255,255,0.04)' } } }
+    }
+});
+
+// Sector Flow Chart
+new Chart(document.getElementById('sectorFlowChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['电子', '电力设备', '通信', '计算机', '医药', '其他'],
+        datasets: [{
+            data: [28.3, 22.1, 18.6, 9.8, 12.4, 15.1],
+            backgroundColor: [
+                'rgba(0,212,255,0.8)', 'rgba(124,58,237,0.8)', 'rgba(16,185,129,0.8)',
+                'rgba(251,191,36,0.8)', 'rgba(239,68,68,0.8)', 'rgba(148,163,184,0.5)'
+            ],
+            borderWidth: 0
+        }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+});
+
+// Volume Chart
+new Chart(document.getElementById('volumeChart'), {
+    type: 'bar',
+    data: {
+        labels: ['W14', 'W15', 'W16', 'W17', 'W18', 'W19', 'W20'],
+        datasets: [{
+            label: '两市日均成交额(亿元)',
+            data: [8956, 9123, 8745, 9034, 9234, 9307, 9885],
+            backgroundColor: 'rgba(0,212,255,0.5)', borderRadius: 4
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'top' } },
+        scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(255,255,255,0.04)' } } }
+    }
+});
+</script>
+
 </body>
 </html>

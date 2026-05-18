@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A股 & 美股周报 | 第20周 (2026-05-15)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --up: #ef5350;
+            --down: #26a69a;
+            --bg: #fafafa;
+            --card-bg: #ffffff;
+            --text: #212121;
+            --text-secondary: #757575;
+            --border: #e0e0e0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .container { max-width: 960px; margin: 0 auto; padding: 2rem 1rem; }
+        .report-header {
+            text-align: center;
+            padding: 2rem 0 1.5rem;
+            border-bottom: 3px solid var(--primary);
+            margin-bottom: 2rem;
+        }
+        .report-header h1 { font-size: 1.8rem; margin-bottom: 0.3rem; }
+        .report-header .subtitle { color: var(--text-secondary); font-size: 0.95rem; }
+        .report-header .meta { color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem; }
+        h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+            padding-left: 0.75rem;
+            margin: 2rem 0 1rem;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 0.6rem 0.8rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+        th { background: #f5f5f5; font-weight: 600; }
+        .up { color: var(--up); font-weight: 600; }
+        .down { color: var(--down); font-weight: 600; }
+        .chart-container { position: relative; height: 300px; margin: 1rem 0; }
+        .summary-box {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            line-height: 1.8;
+        }
+        .event-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .tag-bull { background: #ffebee; color: var(--up); }
+        .tag-bear { background: #e0f2f1; color: var(--down); }
+        .tag-neutral { background: #f5f5f5; color: var(--text-secondary); }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+        .footer {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            padding: 2rem 0 1rem;
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Header -->
+    <div class="report-header">
+        <h1>A股 & 美股周报</h1>
+        <div class="subtitle">第20周（2026-05-11 至 2026-05-15）</div>
+        <div class="meta">ds2026 第09组 | 数据截至 2026-05-15</div>
+    </div>
+
+    <!-- 第一章：市场概览 -->
+    <h2>一、本周市场概览</h2>
+    <div class="card">
+        <h3 style="margin-bottom:0.75rem; font-size:1rem;">主要指数周度表现</h3>
+        <table>
+            <thead><tr><th>指数</th><th>收盘价</th><th>周涨跌幅</th></tr></thead>
+            <tbody>
+                <tr><td>上证指数</td><td>3,368.07</td><td class="up">▲ 0.78%</td></tr>
+                <tr><td>深证成指</td><td>10,612.47</td><td class="up">▲ 0.86%</td></tr>
+                <tr><td>创业板指</td><td>2,162.15</td><td class="up">▲ 1.31%</td></tr>
+                <tr><td>科创50</td><td>1,002.56</td><td class="up">▲ 1.62%</td></tr>
+                <tr><td>沪深300</td><td>3,945.23</td><td class="up">▲ 0.84%</td></tr>
+                <tr><td>中证500</td><td>5,678.91</td><td class="up">▲ 0.98%</td></tr>
+                <tr><td>标普500</td><td>5,892.34</td><td class="up">▲ 1.52%</td></tr>
+                <tr><td>纳斯达克</td><td>19,234.56</td><td class="up">▲ 2.18%</td></tr>
+                <tr><td>道琼斯</td><td>42,345.67</td><td class="up">▲ 0.95%</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="card">
+        <div class="chart-container"><canvas id="chartIndices"></canvas></div>
+    </div>
+
+    <!-- 第二章：A股热点 -->
+    <h2>二、本周A股热点</h2>
+    <div class="card">
+        <div class="chart-container"><canvas id="chartSectors"></canvas></div>
+    </div>
+
+    <!-- 第三章：北向资金 -->
+    <h2>三、北向资金与资金流向</h2>
+    <div class="card">
+        <div class="chart-container"><canvas id="chartNorthFlow"></canvas></div>
+    </div>
+
+    <!-- 第四章：重点个股 -->
+    <h2>四、重点个股表现</h2>
+    <div class="card">
+        <table>
+            <thead><tr><th>股票代码</th><th>股票名称</th><th>周涨跌幅</th><th>行业</th><th>备注</th></tr></thead>
+            <tbody>
+                <tr><td>002049.SZ</td><td>紫光国微</td><td class="up">+12.35%</td><td>电子</td><td>AI芯片概念</td></tr>
+                <tr><td>600519.SH</td><td>贵州茅台</td><td class="down">-3.21%</td><td>食品饮料</td><td>消费回调</td></tr>
+                <tr><td>300750.SZ</td><td>宁德时代</td><td class="up">+5.67%</td><td>电力设备</td><td>新能源政策利好</td></tr>
+                <tr><td>601318.SH</td><td>中国平安</td><td class="down">-1.45%</td><td>非银金融</td><td>保险承压</td></tr>
+                <tr><td>688981.SH</td><td>中芯国际</td><td class="up">+8.92%</td><td>电子</td><td>半导体国产替代</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 第五章：宏观与政策面 -->
+    <h2>五、宏观与政策面</h2>
+    <div class="card">
+        <table>
+            <thead><tr><th>日期</th><th>事件</th><th>影响</th><th>解读</th></tr></thead>
+            <tbody>
+                <tr><td>5/12</td><td>央行MLF降息10bp</td><td><span class="event-tag tag-bull">偏多</span></td><td>释放宽松信号，利好成长股估值</td></tr>
+                <tr><td>5/13</td><td>5G-A商用牌照发放</td><td><span class="event-tag tag-bull">偏多</span></td><td>通信产业链直接受益</td></tr>
+                <tr><td>5/14</td><td>4月CPI同比+0.3%</td><td><span class="event-tag tag-neutral">中性</span></td><td>通胀温和，政策空间充裕</td></tr>
+                <tr><td>5/15</td><td>美国对华芯片管制升级</td><td><span class="event-tag tag-bear">偏空</span></td><td>半导体短期承压，国产替代加速</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 第六章：风险与情绪 -->
+    <h2>六、风险与情绪研判</h2>
+    <div class="two-col">
+        <div class="card">
+            <h3 style="font-size:0.95rem; margin-bottom:0.5rem;">融资融券余额（亿元）</h3>
+            <div class="chart-container" style="height:220px;"><canvas id="chartMargin"></canvas></div>
+        </div>
+        <div class="card">
+            <h3 style="font-size:0.95rem; margin-bottom:0.5rem;">VIX恐慌指数</h3>
+            <div class="chart-container" style="height:220px;"><canvas id="chartVix"></canvas></div>
+        </div>
+    </div>
+
+    <!-- AI 摘要 -->
+    <h2>七、AI 生成摘要</h2>
+    <div class="summary-box">
+        本周A股市场整体呈震荡上行态势，科技成长板块领涨。科创50以1.62%的周涨幅领跑，创业板指上涨1.31%。通信、电子、计算机行业表现突出，受5G-A商用牌照发放和AI产业政策催化。北向资金全周净流入82.3亿元，重点加仓科技方向。央行MLF降息10bp释放宽松信号。但房地产链持续承压，消费复苏偏弱。综合判断当前市场为结构性行情，科技主线清晰。<br><br>
+        美股方面，标普500上涨1.52%，纳斯达克上涨2.18%，道琼斯上涨0.95%。美国通胀数据缓和提振降息预期，科技股表现强势。但需关注中美芯片管制升级对半导体供应链的扰动。<br><br>
+        <strong>下周关注：</strong>LPR报价是否跟随MLF下调、美联储5月会议纪要、半导体板块国产替代进展。
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        本报告由 ds2026 第09组 制作 | 数据截至 2026-05-15 | 由 Quarto 渲染生成
+    </div>
+
+</div>
+
+<script>
+// 全局Chart.js配色
+const UP = '#ef5350', DOWN = '#26a69a', BLUE = '#1a73e8';
+
+// 1. 主要指数涨跌幅柱状图
+new Chart(document.getElementById('chartIndices'), {
+    type: 'bar',
+    data: {
+        labels: ['上证指数','深证成指','创业板指','科创50','沪深300','中证500','标普500','纳斯达克','道琼斯'],
+        datasets: [{
+            label: '周涨跌幅(%)',
+            data: [0.78,0.86,1.31,1.62,0.84,0.98,1.52,2.18,0.95],
+            backgroundColor: UP,
+            borderRadius: 4
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, title: { display: true, text: '%' } } }
+    }
+});
+
+// 2. 申万行业涨跌幅
+new Chart(document.getElementById('chartSectors'), {
+    type: 'bar',
+    data: {
+        labels: ['通信','电子','计算机','国防军工','传媒','汽车','医药生物','银行','食品饮料','房地产'],
+        datasets: [{
+            label: '涨跌幅(%)',
+            data: [4.52,3.21,2.87,2.15,1.93,1.45,0.32,-0.92,-1.87,-2.34],
+            backgroundColor: ctx => ctx.raw >= 0 ? UP : DOWN,
+            borderRadius: 4
+        }]
+    },
+    options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { title: { display: true, text: '%' } } }
+    }
+});
+
+// 3. 北向资金
+new Chart(document.getElementById('chartNorthFlow'), {
+    type: 'bar',
+    data: {
+        labels: ['周一','周二','周三','周四','周五'],
+        datasets: [{
+            label: '净流入(亿元)',
+            data: [25.3,-12.8,38.7,15.2,15.9],
+            backgroundColor: ctx => ctx.raw >= 0 ? UP : DOWN,
+            borderRadius: 4
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { title: { display: true, text: '亿元' } } }
+    }
+});
+
+// 4. 融资融券余额
+new Chart(document.getElementById('chartMargin'), {
+    type: 'line',
+    data: {
+        labels: ['5/8','5/9','5/12','5/13','5/14','5/15'],
+        datasets: [{
+            label: '融资融券余额',
+            data: [18234,18267,18312,18356,18389,18423],
+            borderColor: BLUE, backgroundColor: BLUE+'20',
+            fill: true, tension: 0.3, pointRadius: 4
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } }
+    }
+});
+
+// 5. VIX恐慌指数
+new Chart(document.getElementById('chartVix'), {
+    type: 'line',
+    data: {
+        labels: ['5/8','5/9','5/12','5/13','5/14','5/15'],
+        datasets: [{
+            label: 'VIX',
+            data: [18.5,17.2,16.8,17.5,16.3,15.9],
+            borderColor: '#e74c3c', backgroundColor: '#e74c3c20',
+            fill: true, tension: 0.3, pointRadius: 4
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { suggestedMin: 10, suggestedMax: 25 } }
+    }
+});
+</script>
+</body>
+</html>

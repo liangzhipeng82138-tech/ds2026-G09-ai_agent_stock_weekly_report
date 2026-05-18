@@ -1,0 +1,62 @@
+name: Weekly Market Report
+
+on:
+  schedule:
+    - cron: '0 8 * * 5'   # UTC 时间每周五 08:00 = 北京时间 16:00
+  workflow_dispatch:        # 允许手动触发（测试用）
+
+jobs:
+  generate-report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install akshare yfinance anthropic python-dotenv pandas matplotlib
+
+      - name: Fetch data
+        run: python scripts/01_fetch_data.py
+
+      - name: Generate AI summary
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/02_generate_summary.py
+
+      - name: Install Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Install TinyTeX for PDF rendering
+        run: quarto install tinytex
+
+      - name: Render Quarto report (HTML + PDF)
+        run: quarto render report_template.qmd --to html,pdf
+
+      - name: Render demo static report
+        run: quarto render demo_static/demo_report.qmd --to html,pdf
+
+      - name: Copy outputs
+        run: |
+          mkdir -p output
+          cp report_template.html output/weekly_report.html 2>/dev/null || true
+          cp report_template.pdf output/weekly_report.pdf 2>/dev/null || true
+          cp demo_static/demo_report.html output/demo_report.html 2>/dev/null || true
+          cp demo_static/demo_report.pdf output/demo_report.pdf 2>/dev/null || true
+
+      - name: Commit and push output
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add output/ data/ index.html pages/
+          git commit -m "chore: weekly report $(date +%Y-%m-%d)" || echo "No changes to commit"
+          git push
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./

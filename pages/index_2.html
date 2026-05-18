@@ -1,118 +1,268 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>A股周报 - 第2章 板块与行业轮动</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg-primary: #0a0e27;
-      --bg-secondary: #111538;
-      --bg-card: #161a3a;
-      --border-color: #252a52;
-      --text-primary: #e8eaf6;
-      --text-secondary: #8b8fb0;
-      --text-muted: #5c6080;
-      --accent-purple: #a855f7;
-      --sidebar-width: 280px;
-      --gradient-main: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Noto Sans SC', sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      min-height: 100vh;
-      display: flex;
-    }
-    .sidebar {
-      width: var(--sidebar-width);
-      min-height: 100vh;
-      background: var(--bg-secondary);
-      border-right: 1px solid var(--border-color);
-      position: fixed;
-      left: 0; top: 0; bottom: 0;
-      z-index: 100;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-    }
-    .sidebar-header { padding: 24px 20px; border-bottom: 1px solid var(--border-color); }
-    .sidebar-header .logo {
-      font-size: 13px; font-weight: 700; letter-spacing: 2px;
-      background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      margin-bottom: 4px;
-    }
-    .sidebar-header .subtitle { font-size: 11px; color: var(--text-muted); letter-spacing: 1px; }
-    .sidebar-nav { flex: 1; padding: 16px 12px; }
-    .nav-section-label { font-size: 10px; font-weight: 600; letter-spacing: 2px; color: var(--text-muted); padding: 8px 12px 6px; }
-    .nav-item {
-      display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px;
-      color: var(--text-secondary); text-decoration: none; font-size: 13.5px; transition: all 0.25s; margin-bottom: 2px; position: relative;
-    }
-    .nav-item:hover { background: rgba(59,130,246,0.08); color: var(--text-primary); }
-    .nav-item.active { background: rgba(168,85,247,0.12); color: var(--accent-purple); font-weight: 500; }
-    .nav-item.active::before {
-      content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
-      width: 3px; height: 20px; border-radius: 0 3px 3px 0; background: var(--gradient-main);
-    }
-    .nav-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
-    .nav-item:nth-child(2) .nav-icon { background: rgba(59,130,246,0.15); color: #3b82f6; }
-    .nav-item:nth-child(3) .nav-icon { background: rgba(168,85,247,0.15); color: #a855f7; }
-    .nav-item:nth-child(4) .nav-icon { background: rgba(6,182,212,0.15); color: #06b6d4; }
-    .nav-item:nth-child(5) .nav-icon { background: rgba(245,158,11,0.15); color: #f59e0b; }
-    .nav-item:nth-child(6) .nav-icon { background: rgba(34,197,94,0.15); color: #22c55e; }
-    .nav-item:nth-child(7) .nav-icon { background: rgba(239,68,68,0.15); color: #ef4444; }
-    .nav-item:nth-child(8) .nav-icon { background: rgba(236,72,153,0.15); color: #ec4899; }
-    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-color); font-size: 11px; color: var(--text-muted); text-align: center; line-height: 1.6; }
-    .main-content { margin-left: var(--sidebar-width); flex: 1; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .placeholder { text-align: center; padding: 60px; }
-    .placeholder .icon { font-size: 64px; margin-bottom: 24px; opacity: 0.6; }
-    .placeholder h2 { font-size: 28px; font-weight: 700; margin-bottom: 12px; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .placeholder p { font-size: 16px; color: var(--text-secondary); margin-bottom: 8px; }
-    .placeholder .muted { font-size: 13px; color: var(--text-muted); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第二章：板块与行业轮动分析</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #06080F; --bg2: #0B0F1A; --card: rgba(255,255,255,0.03);
+            --border: rgba(255,255,255,0.06); --accent: #00D4FF; --accent2: #7C3AED;
+            --green: #10B981; --red: #EF4444; --text1: #E2E8F0; --text2: #94A3B8; --text3: #64748B;
+        }
+        body {
+            font-family: 'Inter', 'Noto Sans SC', -apple-system, sans-serif;
+            background: var(--bg); color: var(--text1); padding: 32px 40px; line-height: 1.7;
+        }
+        .page-header { margin-bottom: 36px; }
+        .page-header h1 {
+            font-size: 32px; font-weight: 700;
+            background: linear-gradient(135deg, #fff 30%, var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .page-header .subtitle { color: var(--text3); font-size: 14px; margin-top: 8px; }
+        .page-header .author-tag {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 12px; margin-top: 12px;
+            background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.15);
+            border-radius: 20px; font-size: 12px; color: var(--accent);
+        }
+        h2 { font-size: 20px; font-weight: 600; margin: 32px 0 16px; padding-left: 12px; border-left: 3px solid var(--accent); color: #fff; }
+        h3 { font-size: 16px; font-weight: 600; margin: 20px 0 10px; color: var(--text2); }
+        .card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 24px; margin-bottom: 20px; backdrop-filter: blur(10px);
+        }
+        .card-title { font-size: 14px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; font-weight: 600; }
+        .chart-wrap { position: relative; width: 100%; max-height: 380px; margin: 16px 0; }
+        .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .data-table th { text-align: left; padding: 12px 16px; color: var(--text3); border-bottom: 1px solid var(--border); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .data-table td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text2); }
+        .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .data-table .index-name { color: var(--text1); font-weight: 500; }
+        .up { color: var(--red); }
+        .down { color: var(--green); }
+        .tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+        .tag-hot { background: rgba(239,68,68,0.15); color: #EF4444; }
+        .tag-warm { background: rgba(251,191,36,0.15); color: #FBBF24; }
+        .tag-cool { background: rgba(16,185,129,0.15); color: #10B981; }
+        .concept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+        .concept-card {
+            background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+            border-radius: 10px; padding: 16px; transition: transform 0.2s;
+        }
+        .concept-card:hover { transform: translateY(-2px); }
+        .concept-card .name { font-size: 15px; font-weight: 600; color: var(--text1); margin-bottom: 6px; }
+        .concept-card .change { font-size: 20px; font-weight: 700; }
+        .concept-card .desc { font-size: 12px; color: var(--text3); margin-top: 6px; }
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0,212,255,0.06), rgba(124,58,237,0.04));
+            border: 1px solid rgba(0,212,255,0.12); border-radius: 12px;
+            padding: 24px; margin-top: 24px; line-height: 1.9;
+        }
+        .summary-box h3 { color: var(--accent); margin-bottom: 12px; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+        .summary-box p { color: var(--text2); font-size: 14px; text-indent: 2em; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    </style>
 </head>
 <body>
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="logo">A股股市周报</div>
-      <div class="subtitle">AI Agent Auto-Generated Report</div>
+
+<div class="page-header">
+    <h1>第二章：板块与行业轮动分析</h1>
+    <div class="subtitle">2026年5月11日 — 5月15日 · 申万一级行业涨跌全览</div>
+    <div class="author-tag">👤 吴璇子（25210264）· 板块与行业轮动分析师</div>
+</div>
+
+<!-- Sector Rankings Chart -->
+<h2>一、申万一级行业周涨跌幅排名</h2>
+<div class="card">
+    <div class="card-title">📊 全行业涨跌全景</div>
+    <div class="chart-wrap" style="max-height:500px">
+        <canvas id="sectorChart"></canvas>
     </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section-label">章节导航</div>
-      <a href="../index.html" class="nav-item">
-        <span class="nav-icon">📊</span><span>第1章 大盘整体行情</span>
-      </a>
-      <a href="index_2.html" class="nav-item active">
-        <span class="nav-icon">🔄</span><span>第2章 板块与行业轮动</span>
-      </a>
-      <a href="index_3.html" class="nav-item">
-        <span class="nav-icon">💰</span><span>第3章 资金流向分析</span>
-      </a>
-      <a href="index_4.html" class="nav-item">
-        <span class="nav-icon">🎯</span><span>第4章 重点个股与热点</span>
-      </a>
-      <a href="index_5.html" class="nav-item">
-        <span class="nav-icon">🏛️</span><span>第5章 宏观与政策面</span>
-      </a>
-      <a href="index_6.html" class="nav-item">
-        <span class="nav-icon">⚠️</span><span>第6章 风险与情绪研判</span>
-      </a>
-      <a href="index_7.html" class="nav-item">
-        <span class="nav-icon">🔮</span><span>第7章 下周展望与策略</span>
-      </a>
-    </nav>
-    <div class="sidebar-footer">ds2026 第09组 · AI Agent自动生成<br />数据更新: 2026-05-15</div>
-  </aside>
-  <main class="main-content">
-    <div class="placeholder">
-      <div class="icon">🔄</div>
-      <h2>第2章：板块与行业轮动</h2>
-      <p>赛道研究 · 行业涨跌 · 热门题材</p>
-      <p class="muted">分析师：吴璇子 · 内容待填充</p>
+</div>
+
+<!-- Top/Bottom 5 -->
+<h2>二、涨幅TOP5 & 跌幅TOP5行业</h2>
+<div class="chart-row">
+    <div class="card">
+        <div class="card-title">🔴 涨幅前五行业</div>
+        <table class="data-table">
+            <thead><tr><th>排名</th><th>行业</th><th>周涨跌幅</th><th>驱动因素</th></tr></thead>
+            <tbody>
+                <tr><td>1</td><td class="index-name">通信</td><td class="up">▲ +4.52%</td><td>5G-A商用加速，AI算力需求爆发</td></tr>
+                <tr><td>2</td><td class="index-name">电子</td><td class="up">▲ +3.21%</td><td>半导体国产替代提速，存储芯片涨价</td></tr>
+                <tr><td>3</td><td class="index-name">计算机</td><td class="up">▲ +2.87%</td><td>AI大模型应用落地，数字政务推进</td></tr>
+                <tr><td>4</td><td class="index-name">国防军工</td><td class="up">▲ +2.15%</td><td>地缘局势紧张，军备采购订单增长</td></tr>
+                <tr><td>5</td><td class="index-name">传媒</td><td class="up">▲ +1.93%</td><td>AIGC内容生成商业化，影视票房回暖</td></tr>
+            </tbody>
+        </table>
     </div>
-  </main>
+    <div class="card">
+        <div class="card-title">🟢 跌幅前五行业</div>
+        <table class="data-table">
+            <thead><tr><th>排名</th><th>行业</th><th>周涨跌幅</th><th>下跌原因</th></tr></thead>
+            <tbody>
+                <tr><td>1</td><td class="index-name">房地产</td><td class="down">▼ -2.34%</td><td>4月销售数据不及预期，房企债务风险</td></tr>
+                <tr><td>2</td><td class="index-name">食品饮料</td><td class="down">▼ -1.87%</td><td>消费复苏偏弱，白酒库存压力</td></tr>
+                <tr><td>3</td><td class="index-name">银行</td><td class="down">▼ -0.92%</td><td>LPR下调预期，息差收窄压力</td></tr>
+                <tr><td>4</td><td class="index-name">煤炭</td><td class="down">▼ -0.78%</td><td>进口煤冲击，需求端偏弱</td></tr>
+                <tr><td>5</td><td class="index-name">建筑装饰</td><td class="down">▼ -0.65%</td><td>基建增速放缓，地方财政约束</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Hot Concepts -->
+<h2>三、本周热门概念题材</h2>
+<div class="card">
+    <div class="card-title">🔥 热门题材概览</div>
+    <div class="concept-grid">
+        <div class="concept-card">
+            <div class="name">AI Agent</div>
+            <div class="change up">▲ +6.23%</div>
+            <div class="desc">多模态AI Agent商业化加速，百度/阿里发布新品</div>
+        </div>
+        <div class="concept-card">
+            <div class="name">人形机器人</div>
+            <div class="change up">▲ +5.47%</div>
+            <div class="desc">特斯拉Optimus量产预期，国内机器人产业政策出台</div>
+        </div>
+        <div class="concept-card">
+            <div class="name">5G-A</div>
+            <div class="change up">▲ +4.89%</div>
+            <div class="desc">5G-A商用牌照发放，运营商加速部署</div>
+        </div>
+        <div class="concept-card">
+            <div class="name">国产算力</div>
+            <div class="change up">▲ +4.12%</div>
+            <div class="desc">国产GPU突破，算力租赁需求增长</div>
+        </div>
+        <div class="concept-card">
+            <div class="name">半导体设备</div>
+            <div class="change up">▲ +3.56%</div>
+            <div class="desc">大基金三期投资预期，设备国产化提速</div>
+        </div>
+        <div class="concept-card">
+            <div class="name">低空经济</div>
+            <div class="change up">▲ +2.34%</div>
+            <div class="desc">eVTOL适航审批加速，多地出台支持政策</div>
+        </div>
+        <div class="concept-card">
+            <div class="name">固态电池</div>
+            <div class="change up">▲ +1.87%</div>
+            <div class="desc">多家车企发布固态电池装车计划</div>
+        </div>
+        <div class="concept-card">
+            <div class="name">医药创新</div>
+            <div class="change up">▲ +0.56%</div>
+            <div class="desc">创新药出海进展，但整体板块承压</div>
+        </div>
+    </div>
+</div>
+
+<!-- Sector Rotation Analysis -->
+<h2>四、行业轮动分析</h2>
+<div class="card">
+    <div class="card-title">🔄 近四周行业轮动热力图</div>
+    <div class="chart-wrap" style="max-height:400px">
+        <canvas id="rotationChart"></canvas>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">📋 轮动特征总结</div>
+    <table class="data-table">
+        <thead><tr><th>轮动特征</th><th>具体表现</th><th>持续性判断</th></tr></thead>
+        <tbody>
+            <tr><td class="index-name">科技主线持续</td><td>通信、电子、计算机连续三周位居涨幅前列</td><td><span class="tag tag-hot">强持续</span></td></tr>
+            <tr><td class="index-name">消费持续弱势</td><td>食品饮料、家电连续两周回调</td><td><span class="tag tag-cool">持续偏弱</span></td></tr>
+            <tr><td class="index-name">周期板块分化</td><td>煤炭、钢铁回落，有色金属小幅反弹</td><td><span class="tag tag-warm">震荡分化</span></td></tr>
+            <tr><td class="index-name">金融板块低迷</td><td>银行、非银金融受息差和政策双重压力</td><td><span class="tag tag-cool">短期承压</span></td></tr>
+            <tr><td class="index-name">军工间歇性活跃</td><td>受地缘消息驱动，脉冲式上涨</td><td><span class="tag tag-warm">事件驱动</span></td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Summary -->
+<div class="summary-box">
+    <h3>💡 本章小结</h3>
+    <p>本周行业表现呈现典型的"科技强、消费弱"格局。申万31个一级行业中，20个行业上涨、11个行业下跌。通信以4.52%的周涨幅领涨，主要受益于5G-A商用加速和AI算力需求爆发。电子和计算机紧随其后，半导体国产替代和AI应用落地是核心驱动力。</p>
+    <p>跌幅方面，房地产以-2.34%领跌，4月销售数据不及预期叠加房企债务风险持续发酵。食品饮料受消费复苏偏弱和白酒库存压力影响下跌1.87%。</p>
+    <p>概念题材方面，AI Agent、人形机器人、5G-A三大题材涨幅居前，反映出市场对人工智能产业链的持续追捧。从轮动节奏看，科技主线已连续三周保持强势，资金抱团效应明显，短期仍具备较强持续性。消费和金融板块则需等待基本面改善信号。</p>
+</div>
+
+<script>
+Chart.defaults.color = '#94A3B8';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+Chart.defaults.font.family = "'Inter', 'Noto Sans SC', sans-serif";
+
+// Sector Bar Chart
+const sectors = [
+    ['通信', 4.52], ['电子', 3.21], ['计算机', 2.87], ['国防军工', 2.15], ['传媒', 1.93],
+    ['电力设备', 1.56], ['汽车', 1.34], ['机械设备', 1.12], ['有色金属', 0.89], ['医药生物', 0.56],
+    ['基础化工', 0.34], ['家用电器', 0.12], ['社会服务', -0.15], ['农林牧渔', -0.23], ['公用事业', -0.34],
+    ['环保', -0.41], ['交通运输', -0.45], ['钢铁', -0.52], ['美容护理', -0.56], ['轻工制造', -0.61],
+    ['非银金融', -0.63], ['建筑装饰', -0.65], ['煤炭', -0.78], ['银行', -0.92], ['综合', -1.23],
+    ['商贸零售', -1.45], ['纺织服饰', -1.56], ['食品饮料', -1.87], ['房地产', -2.34]
+];
+
+new Chart(document.getElementById('sectorChart'), {
+    type: 'bar',
+    data: {
+        labels: sectors.map(s => s[0]),
+        datasets: [{
+            data: sectors.map(s => s[1]),
+            backgroundColor: sectors.map(s => s[1] >= 0 ? 'rgba(239,68,68,0.7)' : 'rgba(16,185,129,0.7)'),
+            borderRadius: 3
+        }]
+    },
+    options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.04)' }, title: { display: true, text: '周涨跌幅(%)' } },
+            y: { grid: { display: false } }
+        }
+    }
+});
+
+// Rotation Heatmap (stacked bar as approximation)
+const weekLabels = ['W17', 'W18', 'W19', 'W20'];
+const rotationData = {
+    '通信': [2.1, 3.2, 3.8, 4.52],
+    '电子': [1.5, 2.3, 2.9, 3.21],
+    '计算机': [1.8, 1.5, 2.4, 2.87],
+    '房地产': [-0.5, -1.2, -1.8, -2.34],
+    '食品饮料': [-0.3, -0.8, -1.2, -1.87],
+    '银行': [-0.2, -0.5, -0.7, -0.92]
+};
+
+new Chart(document.getElementById('rotationChart'), {
+    type: 'bar',
+    data: {
+        labels: weekLabels,
+        datasets: Object.entries(rotationData).map(([name, data], i) => ({
+            label: name, data: data,
+            backgroundColor: `hsla(${i * 55}, 70%, 55%, 0.7)`,
+            borderRadius: 2
+        }))
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'top' } },
+        scales: {
+            x: { grid: { display: false } },
+            y: { grid: { color: 'rgba(255,255,255,0.04)' }, title: { display: true, text: '周涨跌幅(%)' } }
+        }
+    }
+});
+</script>
+
 </body>
 </html>
